@@ -1,0 +1,8 @@
+﻿using Microsoft.Data.Sqlite;
+var db = @"C:\tmp\Umbraco\learning\VirtualMembers\UmbracoTest1\umbraco\Data\Umbraco.sqlite.db";
+using var conn = new SqliteConnection($"Data Source={db}");
+conn.Open();
+var cmd = conn.CreateCommand();
+cmd.CommandText = "SELECT key,value FROM umbracoKeyValue WHERE key LIKE '%ContentSeed%'";
+using var r = cmd.ExecuteReader();
+while (r.Read()) Console.WriteLine($"{r["key"]} = {r["value"]}");

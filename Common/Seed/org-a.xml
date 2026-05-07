@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<umbPackage>
+  <info>
+    <package>
+      <name>Org-A</name>
+    </package>
+  </info>
+  <Documents>
+    <DocumentSet importMode="root">
+      <home id="1060" key="b0321c35-e481-4aed-8e09-ba64ccc12480" parentID="-1" level="1" creatorID="-1" sortOrder="1" createDate="2026-04-16T08:29:49" updateDate="2026-04-20T07:40:07" nodeName="Org-A" urlName="org-a" path="-1,1060" isDoc="" nodeType="1056" nodeTypeAlias="home" creatorName="Hubert" writerName="Hubert" writerID="-1" template="1072" isPublished="true">
+        <content id="1063" key="7d69c604-4be5-4db8-af13-6a8a626a6752" parentID="1060" level="2" creatorID="-1" sortOrder="0" createDate="2026-04-16T08:32:30" updateDate="2026-04-16T09:14:50" nodeName="Org-A Content 1" urlName="org-a-content-1" path="-1,1060,1063" isDoc="" nodeType="1057" nodeTypeAlias="content" creatorName="Hubert" writerName="Hubert" writerID="-1" template="1078" isPublished="true">
+          <comment><![CDATA[This content is visible for Org-A members only]]></comment>
+        </content>
+        <content id="1064" key="07af5397-4560-4f07-b625-f6de37c8820a" parentID="1060" level="2" creatorID="-1" sortOrder="1" createDate="2026-04-16T08:33:12" updateDate="2026-04-16T09:15:09" nodeName="Org-A Content 2" urlName="org-a-content-2" path="-1,1060,1064" isDoc="" nodeType="1057" nodeTypeAlias="content" creatorName="Hubert" writerName="Hubert" writerID="-1" template="1078" isPublished="true">
+          <comment><![CDATA[This content is visible for Org-A members only]]></comment>
+        </content>
+      </home>
+    </DocumentSet>
+  </Documents>
+  <DocumentTypes />
+  <MediaTypes />
+  <Templates />
+  <Stylesheets />
+  <Scripts />
+  <PartialViews />
+  <DictionaryItems />
+  <Languages />
+  <DataTypes />
+  <MediaItems />
+</umbPackage>

@@ -1,0 +1,6 @@
+﻿using Microsoft.Data.Sqlite;
+var db = @"C:\tmp\Umbraco\learning\VirtualMembers\UmbracoTest1\umbraco\Data\Umbraco.sqlite.db";
+using var conn = new SqliteConnection($"Data Source={db}");
+conn.Open();
+var cmd = conn.CreateCommand();
+cmd.CommandText = "DELETE FROM umbracoKeyValue WHERE key = 'Umbraco.Core.Upgrader.State+ContentSeed'"; cmd.ExecuteNonQuery(); Console.WriteLine("Done");

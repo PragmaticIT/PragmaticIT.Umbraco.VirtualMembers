@@ -1,0 +1,18 @@
+﻿using Umbraco.Cms.Core.Packaging;
+using Umbraco.Cms.Infrastructure.Migrations;
+
+namespace UmbracoTest1.Seed
+{
+	public class ContentMigrationPlan : PackageMigrationPlan
+	{
+		public ContentMigrationPlan() : base("ContentSeed")
+		{
+		}
+
+		protected override void DefinePlan()
+		{
+			To<ContentMigration>("content-seed-v1");
+			To<ContentMigration>("content-seed-v2");
+		}
+	}
+}

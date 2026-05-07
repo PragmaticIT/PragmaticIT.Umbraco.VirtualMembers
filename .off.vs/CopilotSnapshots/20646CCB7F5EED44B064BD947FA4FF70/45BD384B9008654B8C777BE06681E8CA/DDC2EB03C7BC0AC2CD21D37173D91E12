@@ -1,0 +1,173 @@
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging.Abstractions;
+using Xunit;
+using MsOptions = Microsoft.Extensions.Options.Options;
+using NSubstitute;
+using Pragmatic.Umbraco.VirtualMembers.Services;
+using Umbraco.Cms.Core.Configuration.Models;
+using Umbraco.Cms.Core.Mail;
+using Umbraco.Cms.Core.Models.Email;
+
+namespace Pragmatic.Umbraco.VirtualMembers.Tests.Services;
+
+public sealed class OtpServiceTests : IDisposable
+{
+    private readonly IMemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
+    private readonly IEmailSender _emailSender = Substitute.For<IEmailSender>();
+    private readonly IVirtualMemberSmsService _smsService = Substitute.For<IVirtualMemberSmsService>();
+
+    private OtpService BuildService() => new(
+        _cache,
+        _emailSender,
+        _smsService,
+        MsOptions.Create(new GlobalSettings()),
+        NullLogger<OtpService>.Instance);
+
+    // ── IssueAsync ────────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task IssueAsync_ReturnsNonEmptyToken()
+    {
+        var token = await BuildService().IssueAsync("user@example.com");
+
+        Assert.False(string.IsNullOrWhiteSpace(token));
+    }
+
+    [Fact]
+    public async Task IssueAsync_TwoCalls_ReturnDifferentTokens()
+    {
+        var svc = BuildService();
+
+        var t1 = await svc.IssueAsync("user@example.com");
+        var t2 = await svc.IssueAsync("user@example.com");
+
+        Assert.NotEqual(t1, t2);
+    }
+
+    [Fact]
+    public async Task IssueAsync_SendsEmail()
+    {
+        await BuildService().IssueAsync("user@example.com");
+
+        await _emailSender.Received(1).SendAsync(
+            Arg.Is<EmailMessage>(m => m.To != null && m.To.Contains("user@example.com")),
+            Arg.Any<string>());
+    }
+
+    // ── ValidateAndConsumeAsync ───────────────────────────────────────────────
+
+    [Fact]
+    public async Task ValidateAndConsumeAsync_UnknownToken_ReturnsNull()
+    {
+        var result = await BuildService().ValidateAndConsumeAsync("no-such-token", "123456");
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task ValidateAndConsumeAsync_WrongCode_ReturnsNull()
+    {
+        var svc = BuildService();
+        var token = await svc.IssueAsync("user@example.com");
+
+        var result = await svc.ValidateAndConsumeAsync(token, "000000");
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task ValidateAndConsumeAsync_CorrectCode_ReturnsEmail()
+    {
+        // To get the code we peek into the cache after IssueAsync stores it.
+        // The key format is "vm:otp:<token>" – we recover it via a test-only helper.
+        var svc = BuildService();
+        var token = await svc.IssueAsync("user@example.com");
+
+        _cache.TryGetValue("vm:otp:" + token, out (string email, string storedCode) entry);
+
+        var result = await svc.ValidateAndConsumeAsync(token, entry.storedCode);
+
+        Assert.Equal("user@example.com", result);
+    }
+
+    [Fact]
+    public async Task ValidateAndConsumeAsync_TokenConsumedAfterSuccess()
+    {
+        var svc = BuildService();
+        var token = await svc.IssueAsync("user@example.com");
+        _cache.TryGetValue("vm:otp:" + token, out (string email, string storedCode) entry);
+
+        await svc.ValidateAndConsumeAsync(token, entry.storedCode);
+        var second = await svc.ValidateAndConsumeAsync(token, entry.storedCode);
+
+        Assert.Null(second);
+    }
+
+    [Fact]
+    public async Task ValidateAndConsumeAsync_CodeTrimmed()
+    {
+        var svc = BuildService();
+        var token = await svc.IssueAsync("user@example.com");
+        _cache.TryGetValue("vm:otp:" + token, out (string email, string storedCode) entry);
+
+        var result = await svc.ValidateAndConsumeAsync(token, "  " + entry.storedCode + "  ");
+
+        Assert.Equal("user@example.com", result);
+    }
+
+    // ── IssueSmsAsync / ValidateAndConsumeSmsAsync ────────────────────────────
+
+    [Fact]
+    public async Task IssueSmsAsync_SendsSms()
+    {
+        await BuildService().IssueSmsAsync("+48600000000", "parent-tok");
+
+        await _smsService.Received(1).SendAsync("+48600000000", Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ValidateAndConsumeSmsAsync_UnknownToken_ReturnsFalse()
+    {
+        var result = await BuildService().ValidateAndConsumeSmsAsync("no-such-token", "123456");
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task ValidateAndConsumeSmsAsync_WrongCode_ReturnsFalse()
+    {
+        var svc = BuildService();
+        await svc.IssueSmsAsync("+48600000000", "parent-tok");
+
+        var result = await svc.ValidateAndConsumeSmsAsync("parent-tok", "000000");
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task ValidateAndConsumeSmsAsync_CorrectCode_ReturnsTrue()
+    {
+        var svc = BuildService();
+        await svc.IssueSmsAsync("+48600000000", "parent-tok");
+        _cache.TryGetValue("vm:otp-sms:parent-tok", out string? storedCode);
+
+        var result = await svc.ValidateAndConsumeSmsAsync("parent-tok", storedCode!);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task ValidateAndConsumeSmsAsync_TokenConsumedAfterSuccess()
+    {
+        var svc = BuildService();
+        await svc.IssueSmsAsync("+48600000000", "parent-tok");
+        _cache.TryGetValue("vm:otp-sms:parent-tok", out string? storedCode);
+
+        await svc.ValidateAndConsumeSmsAsync("parent-tok", storedCode!);
+        var second = await svc.ValidateAndConsumeSmsAsync("parent-tok", storedCode!);
+
+        Assert.False(second);
+    }
+
+    public void Dispose() => _cache.Dispose();
+}

@@ -1,0 +1,177 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Pragmatic.Umbraco.VirtualMembers.Helpers
+@using Pragmatic.Umbraco.VirtualMembers.Options
+@inject IVirtualMembersLoginViewHelper LoginViewHelper
+@{
+    Layout = "layout.cshtml";
+    ViewData["Title"] = "Sign in";
+    ViewData["CurrentSite"] = "Public";
+
+    var lc = LoginViewHelper.GetLoginContext();
+
+    var errorMessage = lc.ErrorCode switch
+    {
+        "unauthorized" => "The email address was not recognised or access was denied. Please try again.",
+        null           => null,
+        _              => "An error occurred during sign-in. Please try again."
+    };
+
+    var challengeLabels = new Dictionary<string, (string, string, string)>
+    {
+        ["otp-email"] = ("Email verification code", "6-digit code", "We sent a one-time code to your email address."),
+        ["otp-sms"]   = ("SMS verification code",   "6-digit code", "We sent a one-time code to your mobile number."),
+    };
+
+    var (challengeLabel, challengePlaceholder, challengeHint) = challengeLabels.TryGetValue(lc.ChallengeType, out var info)
+        ? info
+        : ("Verification code", "Enter code", "Enter the code you received.");
+
+    // Subtitle shown in step 1 depending on configured auth mode
+    var step1Hint = lc.Auth.Mode switch
+    {
+        AuthMode.Otp => "Enter your email &ndash; we'll send you a one-time code to sign in.",
+        AuthMode.Mfa => "Enter your email &ndash; we'll send verification codes to your email and phone.",
+        _            => "Enter your email address to access your organization space."
+    };
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-sm-10 col-md-6 col-lg-4">
+            <div class="text-center mb-4">
+                <a href="/" class="text-decoration-none text-muted small d-inline-flex align-items-center mb-2">
+                    &larr; Back to home
+                </a>
+                <h1 class="h3 fw-semibold mb-2">Sign in</h1>
+                <p class="text-muted mb-0">
+                    @(lc.IsChallenge ? challengeHint : step1Hint)
+                </p>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3" role="alert">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-exclamation-circle-fill flex-shrink-0" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                            </svg>
+                            <span class="small">Error</span>
+                        </div>
+                    }
+                    <form method="post" action="@lc.Auth.LoginPath">
+
+                        @* -- Step 1: email -- *@
+                        @if (!lc.IsChallenge)
+                        {
+                            <div class="mb-3">
+                                <label for="email" class="form-label fw-semibold">Email address</label>
+                                <input
+                                    type="email"
+                                    class="form-control"
+                                    id="email"
+                                    name="Email"
+                                    required
+                                    autocomplete="email"
+                                    placeholder="you@example.com"
+                                />
+                            </div>
+
+                            @* -- Auth mode badge -- *@
+                            @if (lc.Auth.Mode != AuthMode.None)
+                            {
+                                <p class="text-muted small mb-3 d-flex align-items-center gap-1">
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                        @lc.Auth.Mode.ToString().ToUpperInvariant()
+                                    </span>
+                                    @(lc.Auth.Mode == AuthMode.Mfa
+                                        ? "Two-factor verification required"
+                                        : "One-time code verification required")
+                                </p>
+                            }
+
+                            @* -- CAPTCHA placeholder -- *@
+                            @if (lc.Auth.CaptchaEnabled)
+                            {
+                                <div class="mb-3 p-3 border rounded bg-light text-center text-muted small">
+                                    <span class="d-block mb-1 fw-semibold">Bot protection</span>
+                                    @* Replace with your CAPTCHA widget (e.g. hCaptcha, Cloudflare Turnstile) *@
+                                    <code class="user-select-all">@* captcha widget here *@</code>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            @* -- Step 2: challenge factor -- *@
+                            @* Email is NOT echoed here – it is encoded inside ChallengeToken *@
+
+                            <div class="mb-3">
+                                <label for="factor" class="form-label fw-semibold">@challengeLabel</label>
+                                <input
+                                    type="text"
+                                    class="form-control form-control-lg text-center"
+                                    id="factor"
+                                        name="Factors[@lc.ChallengeType]"
+                                    required
+                                    autocomplete="one-time-code"
+                                    inputmode="numeric"
+                                    placeholder="@challengePlaceholder"
+                                    autofocus
+                                />
+                            </div>
+
+                            @* MFA – second factor (SMS) shown when first factor was otp-email *@
+                            @if (lc.Auth.Mode == AuthMode.Mfa && lc.ChallengeType == "otp-email")
+                            {
+                                <div class="mb-3">
+                                    <label for="factor-sms" class="form-label fw-semibold">SMS verification code</label>
+                                    <input
+                                        type="text"
+                                        class="form-control form-control-lg text-center"
+                                        id="factor-sms"
+                                        name="Factors[otp-sms]"
+                                        required
+                                        autocomplete="one-time-code"
+                                        inputmode="numeric"
+                                        placeholder="6-digit code"
+                                    />
+                                </div>
+                            }
+
+                            <input type="hidden" name="ChallengeToken" value="@lc.ChallengeToken" />
+                        }
+
+                        @if (!string.IsNullOrEmpty(lc.ReturnUrl))
+                        {
+                            <input type="hidden" name="ReturnUrl" value="@lc.ReturnUrl" />
+                        }
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger py-2 small">@errorMessage</div>
+                        }
+
+                        <button type="submit" class="btn btn-primary w-100 mt-2">
+                            @(lc.IsChallenge ? "Verify" : "Continue")
+                        </button>
+
+                        @if (lc.IsChallenge)
+                        {
+                            <div class="text-center mt-3">
+                                <a href="@lc.Auth.LoginViewPath" class="text-muted small">
+                                    &larr; Use a different email
+                                </a>
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+
+            <p class="text-center text-muted small mt-3 mb-0">
+                In this POC, the email determines which virtual organization
+                the user belongs to.
+            </p>
+        </div>
+    </div>
+</div>

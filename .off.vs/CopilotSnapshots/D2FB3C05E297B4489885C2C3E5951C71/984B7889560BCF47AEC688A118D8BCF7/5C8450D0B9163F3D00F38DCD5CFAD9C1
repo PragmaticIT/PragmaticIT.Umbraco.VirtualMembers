@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- NuGet packaging -->
+    <PackageId>Pragmatic.Umbraco.VirtualMembers</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Pragmatic</Authors>
+    <Description>Virtual (passwordless) member authentication for Umbraco CMS — supports CSV-based member providers, OTP, and pluggable custom providers.</Description>
+    <PackageTags>umbraco;members;authentication;virtual;csv;otp</PackageTags>
+    <PackageProjectUrl>https://github.com/pragmatic-agency/Pragmatic.Umbraco.VirtualMembers</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pragmatic-agency/Pragmatic.Umbraco.VirtualMembers</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Required for Microsoft.AspNetCore.* types (IHttpContextAccessor, IAuthenticationService, etc.) -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Umbraco Core only — no web/infrastructure pull-in, safe for NuGet library distribution -->
+    <PackageReference Include="Umbraco.Cms.Core" Version="17.2.2" />
+  </ItemGroup>
+
+</Project>

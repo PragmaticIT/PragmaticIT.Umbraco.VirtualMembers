@@ -1,0 +1,56 @@
+﻿using Microsoft.Extensions.Logging;
+using System.Security.Claims;
+using Umbraco.Cms.Core.Routing;
+using Umbraco.Cms.Web.Common;
+
+namespace Pragmatic.Umbraco.VirtualMembers.Services;
+
+public sealed class VirtualMembersRedirectService : IVirtualMembersRedirectService
+{
+    private readonly UmbracoHelper _umbracoHelper;
+    private readonly IPublishedUrlProvider _publishedUrlProvider;
+    private readonly ILogger<VirtualMembersRedirectService> _logger;
+
+    public VirtualMembersRedirectService(
+        UmbracoHelper umbracoHelper,
+        IPublishedUrlProvider publishedUrlProvider,
+        ILogger<VirtualMembersRedirectService> logger)
+    {
+        _umbracoHelper = umbracoHelper;
+        _publishedUrlProvider = publishedUrlProvider;
+        _logger = logger;
+    }
+
+    public Task<string?> GetPreferredContentUrlForUserAsync(
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogDebug("Calculating preferred content URL for user {Email}",
+            user.FindFirstValue(ClaimTypes.Email) ?? "unknown");
+
+        var userRoles = user
+            .FindAll(ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (userRoles.Count == 0)
+            return Task.FromResult<string?>(null);
+
+        foreach (var node in _umbracoHelper.ContentAtRoot())
+        {
+            var memberGroups = node.Value<string>("umbracoMemberGroup");
+            if (string.IsNullOrWhiteSpace(memberGroups)) continue;
+
+            var nodeGroups = memberGroups
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            if (!nodeGroups.Any(g => userRoles.Contains(g))) continue;
+
+            var url = node.Url(_publishedUrlProvider);
+            if (!string.IsNullOrWhiteSpace(url))
+                return Task.FromResult<string?>(url);
+        }
+
+        return Task.FromResult<string?>(null);
+    }
+}

@@ -1,0 +1,79 @@
+﻿@using Microsoft.Extensions.Options
+@using System.Security.Claims
+@using PragmaticIT.Umbraco.VirtualMembers.Options
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@inject IOptions<VirtualMembersOptions> VirtualMembersOptions
+@{
+    Layout = "layout.cshtml";
+    ViewData["Title"] = "Access denied";
+    ViewData["CurrentSite"] = "Public";
+
+    var vmAuth     = VirtualMembersOptions.Value.Auth;
+    var vmIdentity = Context.User.Identity as ClaimsIdentity;
+    var vmName     = vmIdentity?.FindFirst(ClaimTypes.Name)?.Value;
+    var vmEmail    = vmIdentity?.FindFirst(ClaimTypes.Email)?.Value;
+    var vmGroups   = vmIdentity?.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList() ?? [];
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-sm-10 col-md-7 col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                403
+                            </span>
+                        </div>
+                        <div>
+                            <h1 class="h4 fw-semibold mb-0">Access denied</h1>
+                            <p class="text-muted small mb-0">
+                                You are signed in, but you do not have access to this space.
+                            </p>
+                        </div>
+                    </div>
+
+                    <p class="text-muted mb-3">
+                        This page is used in the POC to show that virtual users and
+                        organization membership are enforced. For example, an
+                        Organization A user trying to open the Organization B node
+                        should end up here.
+                    </p>
+
+                    @if (!string.IsNullOrEmpty(vmEmail) || !string.IsNullOrEmpty(vmName))
+                    {
+                        <p class="small mb-3">
+                            Signed in as <strong>@(vmName ?? vmEmail)</strong><br />
+                            @if (!string.IsNullOrEmpty(vmName) && !string.IsNullOrEmpty(vmEmail))
+                            {
+                                <span class="text-muted">(@vmEmail)</span>
+                                <br />
+                            }
+                            @foreach (var group in vmGroups)
+                            {
+                                <span>Organization: <strong>@group</strong></span>
+                                <br />
+                            }
+                        </p>
+                    }
+
+                    <div class="d-grid gap-2 mt-3">
+                        <form method="post" action="@vmAuth.LogoutPath">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-secondary w-100">
+                                Sign in with a different account
+                            </button>
+                        </form>
+                        <a href="/" class="btn btn-link text-decoration-none">
+                            ? Back to home
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center text-muted small mt-3 mb-0">
+                In production, this page can also link to support or request-access flows.
+            </p>
+        </div>
+    </div>
+</div>

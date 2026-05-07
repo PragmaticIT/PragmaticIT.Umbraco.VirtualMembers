@@ -1,0 +1,242 @@
+using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
+using PragmaticIT.Umbraco.VirtualMembers.Models;
+using PragmaticIT.Umbraco.VirtualMembers.Options;
+using PragmaticIT.Umbraco.VirtualMembers.Providers.Csv;
+using PragmaticIT.Umbraco.VirtualMembers.Services;
+
+namespace PragmaticIT.Umbraco.VirtualMembers.Tests.Providers.Csv;
+
+public sealed class CsvVirtualMemberProviderTests
+{
+    private readonly ICsvVirtualMemberStore _store = Substitute.For<ICsvVirtualMemberStore>();
+    private readonly IOtpService _otpService = Substitute.For<IOtpService>();
+
+    private CsvVirtualMemberProvider BuildProvider(AuthMode mode = AuthMode.None)
+    {
+        var options = MsOptions.Create(new VirtualMembersOptions
+        {
+            Auth = new VirtualMembersOptions.AuthOptions { Mode = mode }
+        });
+        return new CsvVirtualMemberProvider(_store, _otpService, options, NullLogger<CsvVirtualMemberProvider>.Instance);
+    }
+
+    private void SetupProfiles(params VirtualMemberProfile[] profiles)
+    {
+        var dict = profiles.ToDictionary(p => p.Email.ToLowerInvariant());
+        _store.GetAllProfilesAsync(Arg.Any<CancellationToken>())
+              .Returns(dict);
+    }
+
+    // ── Mode: None ────────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task AuthenticateAsync_ModeNone_UserExists_ReturnsSucceeded()
+    {
+        var profile = new VirtualMemberProfile { Email = "user@example.com", Groups = ["editors"] };
+        SetupProfiles(profile);
+
+        var result = await BuildProvider(AuthMode.None)
+            .AuthenticateAsync(new AuthenticationContext { Email = "user@example.com" });
+
+        var success = Assert.IsType<AuthenticationResult.Succeeded>(result);
+        Assert.Equal("user@example.com", success.Profile.Email);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_ModeNone_UserNotFound_ReturnsFailed()
+    {
+        SetupProfiles(); // empty store
+
+        var result = await BuildProvider(AuthMode.None)
+            .AuthenticateAsync(new AuthenticationContext { Email = "nobody@example.com" });
+
+        var failed = Assert.IsType<AuthenticationResult.Failed>(result);
+        Assert.Equal("UserNotFound", failed.Reason);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_EmailNormalized_MatchesCaseInsensitive()
+    {
+        var profile = new VirtualMemberProfile { Email = "user@example.com", Groups = [] };
+        SetupProfiles(profile);
+
+        var result = await BuildProvider(AuthMode.None)
+            .AuthenticateAsync(new AuthenticationContext { Email = "  USER@EXAMPLE.COM  " });
+
+        Assert.IsType<AuthenticationResult.Succeeded>(result);
+    }
+
+    // ── Mode: Otp ─────────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task AuthenticateAsync_ModeOtp_FirstStep_ReturnsChallengeRequired()
+    {
+        SetupProfiles(new VirtualMemberProfile { Email = "user@example.com", Groups = [] });
+        _otpService.IssueAsync("user@example.com", Arg.Any<CancellationToken>()).Returns("tok-1");
+
+        var result = await BuildProvider(AuthMode.Otp)
+            .AuthenticateAsync(new AuthenticationContext { Email = "user@example.com" });
+
+        var challenge = Assert.IsType<AuthenticationResult.ChallengeRequired>(result);
+        Assert.Equal("otp-email", challenge.ChallengeType);
+        Assert.Equal("tok-1", challenge.ChallengeToken);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_ModeOtp_ValidCode_ReturnsSucceeded()
+    {
+        var profile = new VirtualMemberProfile { Email = "user@example.com", Groups = [] };
+        SetupProfiles(profile);
+        _otpService.ValidateAndConsumeAsync("tok-1", "123456", Arg.Any<CancellationToken>())
+                   .Returns("user@example.com");
+
+        var context = new AuthenticationContext
+        {
+            Email = "user@example.com",
+            ChallengeToken = "tok-1",
+            Factors = new Dictionary<string, string> { ["otp-email"] = "123456" }
+        };
+
+        var result = await BuildProvider(AuthMode.Otp).AuthenticateAsync(context);
+
+        Assert.IsType<AuthenticationResult.Succeeded>(result);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_ModeOtp_MissingCodeInFactors_ReturnsFailed()
+    {
+        var context = new AuthenticationContext
+        {
+            Email = "user@example.com",
+            ChallengeToken = "tok-1",
+            Factors = new Dictionary<string, string>() // brak "otp-email"
+        };
+
+        var result = await BuildProvider(AuthMode.Otp).AuthenticateAsync(context);
+
+        var failed = Assert.IsType<AuthenticationResult.Failed>(result);
+        Assert.Equal("MissingOtpCode", failed.Reason);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_ModeOtp_InvalidCode_ReturnsFailed()
+    {
+        _otpService.ValidateAndConsumeAsync("tok-1", "000000", Arg.Any<CancellationToken>())
+                   .Returns((string?)null);
+
+        var context = new AuthenticationContext
+        {
+            Email = "user@example.com",
+            ChallengeToken = "tok-1",
+            Factors = new Dictionary<string, string> { ["otp-email"] = "000000" }
+        };
+
+        var result = await BuildProvider(AuthMode.Otp).AuthenticateAsync(context);
+
+        var failed = Assert.IsType<AuthenticationResult.Failed>(result);
+        Assert.Equal("InvalidOtpCode", failed.Reason);
+    }
+
+    // ── Mode: Mfa ─────────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task AuthenticateAsync_ModeMfa_UserWithMobile_IssuesSmsOtp()
+    {
+        var profile = new VirtualMemberProfile { Email = "user@example.com", Mobile = "+48600000000", Groups = [] };
+        SetupProfiles(profile);
+        _otpService.IssueAsync("user@example.com", Arg.Any<CancellationToken>()).Returns("tok-2");
+
+        await BuildProvider(AuthMode.Mfa)
+            .AuthenticateAsync(new AuthenticationContext { Email = "user@example.com" });
+
+        await _otpService.Received(1).IssueSmsAsync("+48600000000", "tok-2", Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_ModeMfa_UserWithoutMobile_DoesNotIssueSmsOtp()
+    {
+        var profile = new VirtualMemberProfile { Email = "user@example.com", Mobile = null, Groups = [] };
+        SetupProfiles(profile);
+        _otpService.IssueAsync("user@example.com", Arg.Any<CancellationToken>()).Returns("tok-2");
+
+        await BuildProvider(AuthMode.Mfa)
+            .AuthenticateAsync(new AuthenticationContext { Email = "user@example.com" });
+
+        await _otpService.DidNotReceive().IssueSmsAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_ModeMfa_ValidBothCodes_ReturnsSucceeded()
+    {
+        var profile = new VirtualMemberProfile { Email = "user@example.com", Groups = [] };
+        SetupProfiles(profile);
+        _otpService.ValidateAndConsumeAsync("tok-2", "111111", Arg.Any<CancellationToken>())
+                   .Returns("user@example.com");
+        _otpService.ValidateAndConsumeSmsAsync("tok-2", "999999", Arg.Any<CancellationToken>())
+                   .Returns(true);
+
+        var context = new AuthenticationContext
+        {
+            Email = "user@example.com",
+            ChallengeToken = "tok-2",
+            Factors = new Dictionary<string, string>
+            {
+                ["otp-email"] = "111111",
+                ["otp-sms"]   = "999999"
+            }
+        };
+
+        var result = await BuildProvider(AuthMode.Mfa).AuthenticateAsync(context);
+
+        Assert.IsType<AuthenticationResult.Succeeded>(result);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_ModeMfa_InvalidSmsCode_ReturnsFailed()
+    {
+        _otpService.ValidateAndConsumeAsync("tok-2", "111111", Arg.Any<CancellationToken>())
+                   .Returns("user@example.com");
+        _otpService.ValidateAndConsumeSmsAsync("tok-2", "wrong", Arg.Any<CancellationToken>())
+                   .Returns(false);
+
+        var context = new AuthenticationContext
+        {
+            Email = "user@example.com",
+            ChallengeToken = "tok-2",
+            Factors = new Dictionary<string, string>
+            {
+                ["otp-email"] = "111111",
+                ["otp-sms"]   = "wrong"
+            }
+        };
+
+        var result = await BuildProvider(AuthMode.Mfa).AuthenticateAsync(context);
+
+        var failed = Assert.IsType<AuthenticationResult.Failed>(result);
+        Assert.Equal("InvalidSmsCode", failed.Reason);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_ModeMfa_MissingSmsCode_ReturnsFailed()
+    {
+        _otpService.ValidateAndConsumeAsync("tok-2", "111111", Arg.Any<CancellationToken>())
+                   .Returns("user@example.com");
+
+        var context = new AuthenticationContext
+        {
+            Email = "user@example.com",
+            ChallengeToken = "tok-2",
+            Factors = new Dictionary<string, string>
+            {
+                ["otp-email"] = "111111"
+                // brak "otp-sms"
+            }
+        };
+
+        var result = await BuildProvider(AuthMode.Mfa).AuthenticateAsync(context);
+
+        var failed = Assert.IsType<AuthenticationResult.Failed>(result);
+        Assert.Equal("MissingSmsCode", failed.Reason);
+    }
+}

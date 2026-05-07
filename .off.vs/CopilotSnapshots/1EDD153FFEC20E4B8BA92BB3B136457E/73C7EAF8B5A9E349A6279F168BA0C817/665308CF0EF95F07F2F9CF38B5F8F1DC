@@ -1,0 +1,44 @@
+﻿using Microsoft.Extensions.Options;
+using System.Xml.Linq;
+using Umbraco.Cms.Core.Configuration.Models;
+using Umbraco.Cms.Core.IO;
+using Umbraco.Cms.Core.PropertyEditors;
+using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Strings;
+using Umbraco.Cms.Infrastructure.Migrations;
+using Umbraco.Cms.Infrastructure.Packaging;
+
+namespace UmbracoTest1.Seed
+{
+	public class ContentMigration : PackageMigrationBase
+	{
+		public ContentMigration(
+			IPackagingService packagingService,
+			IMediaService mediaService,
+			MediaFileManager mediaFileManager,
+			MediaUrlGeneratorCollection mediaUrlGenerators,
+			IShortStringHelper shortStringHelper,
+			IContentTypeBaseServiceProvider contentTypeBaseServiceProvider,
+			IMigrationContext context,
+			IOptions<PackageMigrationSettings> packageMigrationsSettings)
+			: base(packagingService, mediaService, mediaFileManager, mediaUrlGenerators, shortStringHelper, contentTypeBaseServiceProvider, context, packageMigrationsSettings)
+		{
+		}
+
+		protected override void Migrate()
+		{
+			//string[] packages = new[] {"home.xml", "org-a.xml","org-b.xml"}
+			var resourceNames = this.GetType().Assembly.GetManifestResourceNames()
+				//.Where(x => packages.Contains)
+				.Order();
+
+			foreach (var resource in resourceNames)
+			{
+				XDocument document = XDocument.Load(GetType().Assembly.GetManifestResourceStream(resource));
+				ImportPackage
+					.FromXmlDataManifest(document)
+					.Do();
+			}
+		}
+	}
+}

@@ -1,0 +1,68 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+@using Umbraco.Cms.Core.Mail
+@using Umbraco.Cms.Core.Models.Email;
+
+@inject IEmailSender EmailSender
+
+@{
+    Layout = null; // albo Twój layout
+
+    // TU WPISZ SWÓJ ADRES
+    var toAddress = "you@example.com";
+
+    bool success = false;
+    string resultMessage;
+
+    try
+    {
+        var message = new EmailMessage(
+            toAddress,                    // wezmie "From" z appsettings (Umbraco:CMS:Global:Smtp:From)
+            toAddress,
+            "Test SMTP z Umbraco 17",
+            "Jesli widzisz tego maila, SMTP z konfiguracji Umbraco dziala.",
+            false
+        );
+
+        EmailSender.SendAsync(message,"whatever").GetAwaiter().GetResult();
+
+        success = true;
+        resultMessage = "OK – mail wyslany. Sprawdz skrzynke (i spam).";
+    }
+    catch (Exception ex)
+    {
+        success = false;
+        resultMessage = "BLAD podczas wysylki: " + ex.Message;
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>SMTP Test (Umbraco 17)</title>
+</head>
+<body>
+    <h1>SMTP Test (Umbraco 17)</h1>
+
+    @if (success)
+    {
+        <div style="color: green; font-weight: bold;">
+            @resultMessage
+        </div>
+    }
+    else
+    {
+        <div style="color: red; font-weight: bold; white-space: pre-wrap;">
+            @resultMessage
+        </div>
+    }
+
+    <p>
+        Adres docelowy (To): <strong>@toAddress</strong>
+    </p>
+    <p>
+        Wysylka uzywa <code>IEmailSender</code> i konfiguracji SMTP z <code>Umbraco:CMS:Global:Smtp</code>.
+    </p>
+</body>
+</html>

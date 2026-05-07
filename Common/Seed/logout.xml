@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<umbPackage>
+  <info>
+    <package>
+      <name>Logout</name>
+    </package>
+  </info>
+  <Documents>
+    <DocumentSet importMode="root">
+      <authUtilityPage id="1068" key="10219e40-1e67-490c-a394-7bc24bad45d1" parentID="-1" level="1" creatorID="-1" sortOrder="4" createDate="2026-04-16T08:34:32" updateDate="2026-04-16T08:56:22" nodeName="Logout" urlName="logout" path="-1,1068" isDoc="" nodeType="1058" nodeTypeAlias="authUtilityPage" creatorName="Hubert" writerName="Hubert" writerID="-1" template="1074" isPublished="true" />
+    </DocumentSet>
+  </Documents>
+  <DocumentTypes />
+  <MediaTypes />
+  <Templates />
+  <Stylesheets />
+  <Scripts />
+  <PartialViews />
+  <DictionaryItems />
+  <Languages />
+  <DataTypes />
+  <MediaItems />
+</umbPackage>

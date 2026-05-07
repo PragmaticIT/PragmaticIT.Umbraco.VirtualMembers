@@ -1,0 +1,46 @@
+@using Umbraco.Cms.Web.Common.PublishedModels
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+@{
+    Layout = "layout.cshtml";
+
+    // Tytul strony z Umbraco (np. nazwa node'a)
+    var pageTitle = Model.Name;
+
+    // Pole tekstowe "comment" – informacja dla kogo widoczna jest strona
+    var comment = Model.Value<string>("comment");
+
+    ViewData["Title"] = pageTitle;
+    ViewData["CurrentSite"] = "Public"; // lub inna logika, jesli chcesz
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <header class="mb-4">
+                <h1 class="h3 fw-semibold mb-2">@pageTitle</h1>
+
+                @if (!string.IsNullOrWhiteSpace(comment))
+                {
+                    <p class="text-muted small mb-0">
+                        @comment
+                    </p>
+                }
+            </header>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <p class="mb-0">
+                        This is a sample content page used in the POC.
+                    </p>
+                </div>
+            </div>
+
+            <p class="text-muted small mt-3 mb-0">
+                In a real implementation, access to this content node can be
+                limited by virtual users, membership rules, or other
+                authorization logic.
+            </p>
+        </div>
+    </div>
+</div>

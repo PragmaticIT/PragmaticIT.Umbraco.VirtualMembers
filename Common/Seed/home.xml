@@ -1,0 +1,846 @@
+<?xml version="1.0" encoding="utf-8"?>
+<umbPackage>
+  <info>
+    <package>
+      <name>Home</name>
+    </package>
+  </info>
+  <Documents>
+    <DocumentSet importMode="root">
+      <home id="1059" key="46c54847-aae8-49ae-bf43-d0b5b826d431" parentID="-1" level="1" creatorID="-1" sortOrder="0" createDate="2026-04-16T08:29:35" updateDate="2026-04-16T08:41:33" nodeName="Home" urlName="home" path="-1,1059" isDoc="" nodeType="1056" nodeTypeAlias="home" creatorName="Hubert" writerName="Hubert" writerID="-1" template="1071" isPublished="true">
+        <content id="1062" key="3626f723-782b-4275-9a52-be63f5857216" parentID="1059" level="2" creatorID="-1" sortOrder="0" createDate="2026-04-16T08:30:51" updateDate="2026-04-16T09:15:58" nodeName="Common Content" urlName="common-content" path="-1,1059,1062" isDoc="" nodeType="1057" nodeTypeAlias="content" creatorName="Hubert" writerName="Hubert" writerID="-1" template="1078" isPublished="true">
+          <comment><![CDATA[This is common content visible for everyone]]></comment>
+        </content>
+      </home>
+    </DocumentSet>
+  </Documents>
+  <DocumentTypes>
+    <DocumentType>
+      <Info>
+        <Name>Auth Utility Page</Name>
+        <Alias>authUtilityPage</Alias>
+        <Key>136c4488-6eab-4e89-b470-f229bccdb09e</Key>
+        <Icon>icon-document</Icon>
+        <Thumbnail>folder.png</Thumbnail>
+        <Description />
+        <AllowAtRoot>True</AllowAtRoot>
+        <ListView></ListView>
+        <IsElement>False</IsElement>
+        <Variations>Nothing</Variations>
+        <Compositions />
+        <AllowedTemplates>
+          <Template>login</Template>
+          <Template>logout</Template>
+          <Template>accessDenied</Template>
+        </AllowedTemplates>
+        <DefaultTemplate>accessDenied</DefaultTemplate>
+      </Info>
+      <Structure />
+      <GenericProperties />
+      <Tabs />
+      <HistoryCleanupPolicy preventCleanup="false" />
+    </DocumentType>
+    <DocumentType>
+      <Info>
+        <Name>Content</Name>
+        <Alias>content</Alias>
+        <Key>17f89006-7820-440a-8e85-fc23f3092c4a</Key>
+        <Icon>icon-document</Icon>
+        <Thumbnail>folder.png</Thumbnail>
+        <Description />
+        <AllowAtRoot>False</AllowAtRoot>
+        <ListView></ListView>
+        <IsElement>False</IsElement>
+        <Variations>Nothing</Variations>
+        <Compositions />
+        <AllowedTemplates>
+          <Template>content</Template>
+        </AllowedTemplates>
+        <DefaultTemplate>content</DefaultTemplate>
+      </Info>
+      <Structure />
+      <GenericProperties>
+        <GenericProperty>
+          <Name>comment</Name>
+          <Alias>comment</Alias>
+          <Key>3c6a4926-d36b-4cc3-a6a7-f631692da8a1</Key>
+          <Type>Umbraco.TextBox</Type>
+          <Definition>0cc0eba1-9960-42c9-bf9b-60e150b429ae</Definition>
+          <SortOrder>0</SortOrder>
+          <Mandatory>False</Mandatory>
+          <LabelOnTop>False</LabelOnTop>
+          <Description><![CDATA[]]></Description>
+          <Variations>Nothing</Variations>
+        </GenericProperty>
+      </GenericProperties>
+      <Tabs />
+      <HistoryCleanupPolicy preventCleanup="false" />
+    </DocumentType>
+    <DocumentType>
+      <Info>
+        <Name>Home</Name>
+        <Alias>home</Alias>
+        <Key>65d1f4c5-0b4f-4db6-817f-ce7d834b5475</Key>
+        <Icon>icon-document</Icon>
+        <Thumbnail>folder.png</Thumbnail>
+        <Description />
+        <AllowAtRoot>True</AllowAtRoot>
+        <ListView></ListView>
+        <IsElement>False</IsElement>
+        <Variations>Nothing</Variations>
+        <Compositions />
+        <AllowedTemplates>
+          <Template>home</Template>
+          <Template>orgHome</Template>
+        </AllowedTemplates>
+        <DefaultTemplate>home</DefaultTemplate>
+      </Info>
+      <Structure>
+        <DocumentType>content</DocumentType>
+      </Structure>
+      <GenericProperties />
+      <Tabs />
+      <HistoryCleanupPolicy preventCleanup="false" />
+    </DocumentType>
+  </DocumentTypes>
+  <MediaTypes />
+  <Templates>
+    <Template>
+      <Name>_Layout</Name>
+      <Key>8fcf871c-9953-4e77-bee2-4dd8d63b520c</Key>
+      <Alias>layout</Alias>
+      <Design><![CDATA[@using Umbraco.Cms.Web.Common.PublishedModels
+@using Microsoft.Extensions.Options
+@using System.Security.Claims
+@using PragmaticIT.Umbraco.VirtualMembers.Options
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@inject IOptions<VirtualMembersOptions> VirtualMembersOptions
+@{
+    Layout = null;
+
+    var currentSite = ViewData["CurrentSite"] as string;
+
+    //System.Diagnostics.Debugger.Break();
+
+    var vmAuth     = VirtualMembersOptions.Value.Auth;
+    var vmIdentity = Context.User.Identity as ClaimsIdentity;
+    var isVmUser   = Context.User.Identity?.IsAuthenticated == true;
+    var vmName     = vmIdentity?.FindFirst(ClaimTypes.Name)?.Value;
+    var vmEmail    = vmIdentity?.FindFirst(ClaimTypes.Email)?.Value;
+    var vmGroups   = vmIdentity?.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList() ?? [];
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Virtual Users POC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Bootstrap 5 CDN -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous"
+    />
+
+    <style>
+        /* Kolory nagl�wk�w dla r�znych site'�w */
+        .header-public {
+            background-color: #ffffff;
+        }
+
+        .header-orga {
+            background: linear-gradient(90deg, #0d6efd 0%, #4dabf7 100%);
+            color: #ffffff;
+        }
+
+        .header-orgb {
+            background: linear-gradient(90deg, #198754 0%, #63e6be 100%);
+            color: #ffffff;
+        }
+
+        .header-public .navbar-brand,
+        .header-public .nav-link {
+            color: #212529;
+        }
+
+        .header-orga .navbar-brand,
+        .header-orgb .navbar-brand {
+            color: #ffffff;
+        }
+
+        .header-orga .nav-link,
+        .header-orgb .nav-link {
+            color: #f8f9fa;
+        }
+
+        .header-orga .nav-link:hover,
+        .header-orgb .nav-link:hover {
+            color: #ffffff;
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <header class="
+        navbar navbar-expand-lg navbar-light border-bottom shadow-sm
+        @(
+            currentSite == "OrgA" ? "header-orga" :
+            currentSite == "OrgB" ? "header-orgb" :
+            "header-public"
+        )">
+        <div class="container">
+            <a class="navbar-brand fw-semibold" href="/">
+                Virtual Users POC
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#mainNavbar" aria-controls="mainNavbar"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
+                <ul class="navbar-nav mb-2 mb-lg-0 me-3">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/org-a">Organization A</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/org-b">Organization B</a>
+                    </li>
+                </ul>
+
+                @if (isVmUser)
+                {
+                    <span class="navbar-text me-3 small">
+                        Signed in as <strong>@(vmName ?? vmEmail)</strong>
+                        @foreach (var group in vmGroups)
+                        {
+                            <span class="ms-1 badge bg-light text-dark">@group</span>
+                        }
+                    </span>
+                    <form method="post" action="@vmAuth.LogoutPath" class="m-0 d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-light btn-sm">Sign out</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="@vmAuth.LoginViewPath" class="btn btn-outline-light btn-sm">
+                        Sign in
+                    </a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <footer class="border-top bg-white py-4 mt-auto">
+        <div class="container">
+            @if (isVmUser)
+            {
+                <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center
+                            justify-content-between gap-3 mb-3 pb-3 border-bottom">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="text-muted small">Signed in as</span>
+                        <strong class="small">@(vmName ?? vmEmail)</strong>
+                        @if (!string.IsNullOrEmpty(vmName) && !string.IsNullOrEmpty(vmEmail))
+                        {
+                            <span class="text-muted small">(@vmEmail)</span>
+                        }
+                        @foreach (var group in vmGroups)
+                        {
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                @group
+                            </span>
+                        }
+                    </div>
+
+                    <form method="post" action="@vmAuth.LogoutPath" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">
+                            Sign out
+                        </button>
+                    </form>
+                </div>
+            }
+
+            <div class="text-center text-muted small">
+                &copy; <span id="year"></span> Virtual Users POC
+            </div>
+        </div>
+    </footer>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous">
+    </script>
+    <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>]]></Design>
+    </Template>
+    <Template>
+      <Name>Access Denied</Name>
+      <Key>d2d3be78-39e3-4495-ac93-26e5259d35ec</Key>
+      <Alias>accessDenied</Alias>
+      <Design><![CDATA[@using Microsoft.Extensions.Options
+@using System.Security.Claims
+@using PragmaticIT.Umbraco.VirtualMembers.Options
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@inject IOptions<VirtualMembersOptions> VirtualMembersOptions
+@{
+    Layout = "layout.cshtml";
+    ViewData["Title"] = "Access denied";
+    ViewData["CurrentSite"] = "Public";
+
+    var vmAuth     = VirtualMembersOptions.Value.Auth;
+    var vmIdentity = Context.User.Identity as ClaimsIdentity;
+    var vmName     = vmIdentity?.FindFirst(ClaimTypes.Name)?.Value;
+    var vmEmail    = vmIdentity?.FindFirst(ClaimTypes.Email)?.Value;
+    var vmGroups   = vmIdentity?.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList() ?? [];
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-sm-10 col-md-7 col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                403
+                            </span>
+                        </div>
+                        <div>
+                            <h1 class="h4 fw-semibold mb-0">Access denied</h1>
+                            <p class="text-muted small mb-0">
+                                You are signed in, but you do not have access to this space.
+                            </p>
+                        </div>
+                    </div>
+
+                    <p class="text-muted mb-3">
+                        This page is used in the POC to show that virtual users and
+                        organization membership are enforced. For example, an
+                        Organization A user trying to open the Organization B node
+                        should end up here.
+                    </p>
+
+                    @if (!string.IsNullOrEmpty(vmEmail) || !string.IsNullOrEmpty(vmName))
+                    {
+                        <p class="small mb-3">
+                            Signed in as <strong>@(vmName ?? vmEmail)</strong><br />
+                            @if (!string.IsNullOrEmpty(vmName) && !string.IsNullOrEmpty(vmEmail))
+                            {
+                                <span class="text-muted">(@vmEmail)</span>
+                                <br />
+                            }
+                            @foreach (var group in vmGroups)
+                            {
+                                <span>Organization: <strong>@group</strong></span>
+                                <br />
+                            }
+                        </p>
+                    }
+
+                    <div class="d-grid gap-2 mt-3">
+                        <form method="post" action="@vmAuth.LogoutPath">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-secondary w-100">
+                                Sign in with a different account
+                            </button>
+                        </form>
+                        <a href="/" class="btn btn-link text-decoration-none">
+                            ? Back to home
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center text-muted small mt-3 mb-0">
+                In production, this page can also link to support or request-access flows.
+            </p>
+        </div>
+    </div>
+</div>]]></Design>
+    </Template>
+    <Template>
+      <Name>OrgHome</Name>
+      <Key>1f4b1e34-b592-4d3a-b491-3310778c3986</Key>
+      <Alias>orgHome</Alias>
+      <Design><![CDATA[@using Umbraco.Cms.Web.Common.PublishedModels
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+@{
+    Layout = "layout.cshtml";
+    var organizationCode = @Model.Name.Replace("-",""); 
+    string organizationName;
+    string organizationBadgeCss;
+    string organizationIntro;
+    string organizationSecondaryText;
+
+    if (organizationCode == "OrgB")
+    {
+        organizationName = "Organization B";
+        organizationBadgeCss = "bg-success-subtle text-success border border-success-subtle";
+        organizationIntro = "This area is dedicated to members of Organization B.";
+        organizationSecondaryText =
+            "This page demonstrates that the same Umbraco instance can serve multiple " +
+            "organizations with isolated content and access rules, powered by virtual users.";
+    }
+    else
+    {
+        organizationCode = "OrgA"; // fallback
+        organizationName = "Organization A";
+        organizationBadgeCss = "bg-primary-subtle text-primary border border-primary-subtle";
+        organizationIntro = "Content and navigation are restricted to members of Organization A.";
+        organizationSecondaryText =
+            "If you can see this page, authorization for Organization A has been " +
+            "successfully applied. This area can host content, tools, and dashboards " +
+            "that are only relevant to A�s users.";
+    }
+
+    ViewData["Title"] = organizationName;
+    ViewData["CurrentSite"] = organizationCode; 
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h3 fw-semibold mb-1">@organizationName space</h1>
+                    <p class="text-muted mb-0">
+                        @organizationIntro
+                    </p>
+                </div>
+                <span class="badge @organizationBadgeCss">
+                    @organizationCode
+                </span>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h5 fw-semibold mb-2">Welcome to @organizationName</h2>
+                    <p class="text-muted mb-0">
+                        @organizationSecondaryText
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h3 class="h6 fw-semibold mb-2">
+                                @(organizationCode == "OrgB" ? "B-specific dashboard" : "Internal documents")
+                            </h3>
+                            <p class="text-muted small mb-0">
+                                @(organizationCode == "OrgB"
+                                    ? "Mock dashboard cards and KPIs for this organization."
+                                    : "Example section for organization-specific documentation and knowledge base.")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h3 class="h6 fw-semibold mb-2">
+                                @(organizationCode == "OrgB" ? "News & updates" : "Announcements")
+                            </h3>
+                            <p class="text-muted small mb-0">
+                                @(organizationCode == "OrgB"
+                                    ? "Sample news feed visible only for this tenant."
+                                    : "News, updates, and important messages dedicated to this organization.")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h3 class="h6 fw-semibold mb-2">Tools &amp; links</h3>
+                            <p class="text-muted small mb-0">
+                                Quick access to systems that only @organizationName users
+                                should see.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-muted small mt-4">
+                In a production setup, access to this node would be controlled by
+                virtual users and membership in @organizationName (@organizationCode).
+            </p>
+        </div>
+    </div>
+</div>]]></Design>
+    </Template>
+    <Template>
+      <Name>Home</Name>
+      <Key>fed8ff24-a87a-4449-af25-f8c8b0182645</Key>
+      <Alias>home</Alias>
+      <Design><![CDATA[@using Umbraco.Cms.Web.Common.PublishedModels
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    Layout = "layout.cshtml";
+    ViewData["Title"] = "Home";
+    ViewData["CurrentSite"] = "Public";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-4">
+                <h1 class="fw-semibold mb-3">Organizations Portal</h1>
+                <p class="text-muted mb-0">
+                    This is a public landing page. Access to organization spaces
+                    is restricted to authorized members only.
+                </p>
+            </div>
+
+            <div class="row g-4 mt-4">
+                <div class="col-md-6">
+                    <a href="/org-a" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h2 class="h5 fw-semibold mb-2">Organization A</h2>
+                                <p class="text-muted mb-0">
+                                    Secure workspace for Organization A members.
+                                    Content and navigation are tailored to A&rsquo;s users.
+                                </p>
+                            </div>
+                            <div class="card-footer bg-white border-0 pt-0 pb-3 px-3">
+                                <span class="text-primary fw-semibold">Enter space &rarr;</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-6">
+                    <a href="/org-b" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h2 class="h5 fw-semibold mb-2">Organization B</h2>
+                                <p class="text-muted mb-0">
+                                    Secure workspace for Organization B members.
+                                    Shows how the same platform can serve another tenant.
+                                </p>
+                            </div>
+                            <div class="card-footer bg-white border-0 pt-0 pb-3 px-3">
+                                <span class="text-primary fw-semibold">Enter space &rarr;</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-5 text-center text-muted small">
+                <p class="mb-1">
+                    This POC demonstrates virtual users and organization-scoped access
+                    on top of Umbraco.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+]]></Design>
+    </Template>
+    <Template>
+      <Name>Login</Name>
+      <Key>1684409d-8222-42c7-8c6a-0e7842e73a14</Key>
+      <Alias>login</Alias>
+      <Design><![CDATA[@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using PragmaticIT.Umbraco.VirtualMembers.Helpers
+@using PragmaticIT.Umbraco.VirtualMembers.Options
+@inject IVirtualMembersLoginViewHelper LoginViewHelper
+@{
+    Layout = "layout.cshtml";
+    ViewData["Title"] = "Sign in";
+    ViewData["CurrentSite"] = "Public";
+
+    var lc = LoginViewHelper.GetLoginContext();
+
+    var errorMessage = lc.ErrorCode switch
+    {
+        "unauthorized" => "The email address was not recognised or access was denied. Please try again.",
+        null           => null,
+        _              => "An error occurred during sign-in. Please try again."
+    };
+
+    var challengeLabels = new Dictionary<string, (string, string, string)>
+    {
+        ["otp-email"] = ("Email verification code", "6-digit code", "We sent a one-time code to your email address."),
+        ["otp-sms"]   = ("SMS verification code",   "6-digit code", "We sent a one-time code to your mobile number."),
+    };
+
+    var (challengeLabel, challengePlaceholder, challengeHint) = challengeLabels.TryGetValue(lc.ChallengeType, out var info)
+        ? info
+        : ("Verification code", "Enter code", "Enter the code you received.");
+
+    // Subtitle shown in step 1 depending on configured auth mode
+    var step1Hint = lc.Auth.Mode switch
+    {
+        AuthMode.Otp => "Enter your email &ndash; we'll send you a one-time code to sign in.",
+        AuthMode.Mfa => "Enter your email &ndash; we'll send verification codes to your email and phone.",
+        _            => "Enter your email address to access your organization space."
+    };
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-sm-10 col-md-6 col-lg-4">
+            <div class="text-center mb-4">
+                <a href="/" class="text-decoration-none text-muted small d-inline-flex align-items-center mb-2">
+                    &larr; Back to home
+                </a>
+                <h1 class="h3 fw-semibold mb-2">Sign in</h1>
+                <p class="text-muted mb-0">
+                    @Html.Raw(lc.IsChallenge ? challengeHint : step1Hint)
+                </p>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3" role="alert">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-exclamation-circle-fill flex-shrink-0" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                            </svg>
+                            <span class="small">Error</span>
+                        </div>
+                    }
+                    <form method="post" action="@lc.Auth.LoginPath">
+
+                        @* -- Step 1: email -- *@
+                        @if (!lc.IsChallenge)
+                        {
+                            <div class="mb-3">
+                                <label for="email" class="form-label fw-semibold">Email address</label>
+                                <input
+                                    type="email"
+                                    class="form-control"
+                                    id="email"
+                                    name="Email"
+                                    required
+                                    autocomplete="email"
+                                    placeholder="you@example.com"
+                                />
+                            </div>
+
+                            @* -- Auth mode badge -- *@
+                            @if (lc.Auth.Mode != AuthMode.None)
+                            {
+                                <p class="text-muted small mb-3 d-flex align-items-center gap-1">
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                        @lc.Auth.Mode.ToString().ToUpperInvariant()
+                                    </span>
+                                    @(lc.Auth.Mode == AuthMode.Mfa
+                                        ? "Two-factor verification required"
+                                        : "One-time code verification required")
+                                </p>
+                            }
+
+                            @* -- CAPTCHA placeholder -- *@
+                            @if (lc.Auth.CaptchaEnabled)
+                            {
+                                <div class="mb-3 p-3 border rounded bg-light text-center text-muted small">
+                                    <span class="d-block mb-1 fw-semibold">Bot protection</span>
+                                    @* Replace with your CAPTCHA widget (e.g. hCaptcha, Cloudflare Turnstile) *@
+                                    <code class="user-select-all">@* captcha widget here *@</code>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            @* -- Step 2: challenge factor -- *@
+                            @* Email is NOT echoed here � it is encoded inside ChallengeToken *@
+
+                            <div class="mb-3">
+                                <label for="factor" class="form-label fw-semibold">@challengeLabel</label>
+                                <input
+                                    type="text"
+                                    class="form-control form-control-lg text-center"
+                                    id="factor"
+                                        name="Factors[@lc.ChallengeType]"
+                                    required
+                                    autocomplete="one-time-code"
+                                    inputmode="numeric"
+                                    placeholder="@challengePlaceholder"
+                                    autofocus
+                                />
+                            </div>
+
+                            @* MFA � second factor (SMS) shown when first factor was otp-email *@
+                            @if (lc.Auth.Mode == AuthMode.Mfa && lc.ChallengeType == "otp-email")
+                            {
+                                <div class="mb-3">
+                                    <label for="factor-sms" class="form-label fw-semibold">SMS verification code</label>
+                                    <input
+                                        type="text"
+                                        class="form-control form-control-lg text-center"
+                                        id="factor-sms"
+                                        name="Factors[otp-sms]"
+                                        required
+                                        autocomplete="one-time-code"
+                                        inputmode="numeric"
+                                        placeholder="6-digit code"
+                                    />
+                                </div>
+                            }
+
+                            <input type="hidden" name="ChallengeToken" value="@lc.ChallengeToken" />
+                        }
+
+                        @if (!string.IsNullOrEmpty(lc.ReturnUrl))
+                        {
+                            <input type="hidden" name="ReturnUrl" value="@lc.ReturnUrl" />
+                        }
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger py-2 small">@errorMessage</div>
+                        }
+
+                        <button type="submit" class="btn btn-primary w-100 mt-2">
+                            @(lc.IsChallenge ? "Verify" : "Continue")
+                        </button>
+
+                        @if (lc.IsChallenge)
+                        {
+                            <div class="text-center mt-3">
+                                <a href="@lc.Auth.LoginViewPath" class="text-muted small">
+                                    &larr; Use a different email
+                                </a>
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+
+            <p class="text-center text-muted small mt-3 mb-0">
+                In this POC, the email determines which virtual organization
+                the user belongs to.
+            </p>
+        </div>
+    </div>
+</div>
+]]></Design>
+    </Template>
+    <Template>
+      <Name>Logout</Name>
+      <Key>15d92034-4e30-4a25-8aca-ffe4f9e2a633</Key>
+      <Alias>logout</Alias>
+      <Design><![CDATA[@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    Layout = "layout.cshtml";
+    ViewData["Title"] = "Signed out";
+    ViewData["CurrentSite"] = "Public";
+
+    // Po wylogowaniu mozesz wyczyscic takze ViewData["CurrentUserEmail"] itd.
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-sm-10 col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 text-center">
+                    <h1 class="h4 fw-semibold mb-2">You have been signed out</h1>
+                    <p class="text-muted mb-4">
+                        Your session has ended. You can sign in again to access
+                        your organization space.
+                    </p>
+                    <div class="d-grid gap-2">
+                        <a href="/login" class="btn btn-primary">Sign in again</a>
+                        <a href="/" class="btn btn-outline-secondary">Go to home page</a>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center text-muted small mt-3 mb-0">
+                In a real implementation, this page is shown after the session
+                is cleared by the authentication pipeline.
+            </p>
+        </div>
+    </div>
+</div>]]></Design>
+    </Template>
+    <Template>
+      <Name>Content</Name>
+      <Key>764bbe1b-7c86-4f35-aa78-01307d698270</Key>
+      <Alias>content</Alias>
+      <Design><![CDATA[@using Umbraco.Cms.Web.Common.PublishedModels
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+@{
+    Layout = "layout.cshtml";
+
+    // Tytul strony z Umbraco (np. nazwa node'a)
+    var pageTitle = Model.Name;
+
+    // Pole tekstowe "comment" � informacja dla kogo widoczna jest strona
+    var comment = Model.Value<string>("comment");
+
+    ViewData["Title"] = pageTitle;
+    ViewData["CurrentSite"] = "Public"; // lub inna logika, jesli chcesz
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <header class="mb-4">
+                <h1 class="h3 fw-semibold mb-2">@pageTitle</h1>
+
+                @if (!string.IsNullOrWhiteSpace(comment))
+                {
+                    <p class="text-muted small mb-0">
+                        @comment
+                    </p>
+                }
+            </header>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <p class="mb-0">
+                        This is a sample content page used in the POC.
+                    </p>
+                </div>
+            </div>
+
+            <p class="text-muted small mt-3 mb-0">
+                In a real implementation, access to this content node can be
+                limited by virtual users, membership rules, or other
+                authorization logic.
+            </p>
+        </div>
+    </div>
+</div>]]></Design>
+    </Template>
+  </Templates>
+  <Stylesheets />
+  <Scripts />
+  <PartialViews />
+  <DictionaryItems />
+  <Languages />
+  <DataTypes />
+  <MediaItems />
+</umbPackage>

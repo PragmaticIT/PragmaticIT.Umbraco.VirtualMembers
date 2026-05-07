@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- Fallback used locally and in IDE; CI overrides via /p:UmbracoVersion=x.y.z -->
+    <UmbracoVersion Condition="'$(UmbracoVersion)' == ''">17.3.4</UmbracoVersion>
+    <!-- Oldest Umbraco version the package is compatible with (IPublishedContentCache.GetByIdAsync) -->
+    <UmbracoMinVersion>15.0.0</UmbracoMinVersion>
+    <!--
+      NuGet audit is disabled for this library project. The PackageReference range [15.0.0, 18.0.0)
+      causes NuGet to resolve to the minimum (15.0.0) which carries known CVEs in older Umbraco
+      transitive deps. Security auditing is the responsibility of the consuming application, not
+      the library � consumers will see audit warnings against their own resolved dependency graph.
+    -->
+    <NuGetAudit>false</NuGetAudit>
+    <!-- NuGet packaging -->
+    <PackageId>PragmaticIT.Umbraco.VirtualMembers</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Hubert</Authors>
+    <Company>Pragmatic IT</Company>
+    <Copyright>Copyright © 2025 Pragmatic IT</Copyright>
+    <Description>Virtual (passwordless) member authentication for Umbraco CMS � supports CSV-based member providers, OTP, and pluggable custom providers.</Description>
+    <PackageTags>umbraco;members;authentication;virtual;csv;otp</PackageTags>
+    <PackageProjectUrl>https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/releases</PackageReleaseNotes>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Required for Microsoft.AspNetCore.* types (IHttpContextAccessor, IAuthenticationService, etc.) -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Umbraco.Cms.Web.Common � the lightest package that includes:
+        - Umbraco.Cms.Core (IComposer, IUmbracoBuilder, IMemberGroupService, IPublicAccessChecker, etc.)
+        - UmbracoHelper, IUmbracoApplicationBuilderContext
+      Intentionally NOT referencing Umbraco.Cms (meta-package) to avoid pulling in
+      Infrastructure, StaticFiles, and other host-only assemblies into the NuGet consumer.
+    -->
+    <PackageReference Include="Umbraco.Cms.Web.Common" Version="[$(UmbracoMinVersion), 18.0.0)" />
+  </ItemGroup>
+
+</Project>

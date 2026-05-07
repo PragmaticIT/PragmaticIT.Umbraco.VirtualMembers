@@ -1,0 +1,102 @@
+﻿using Microsoft.Extensions.Options;
+using System.Xml.Linq;
+using Umbraco.Cms.Core.Configuration.Models;
+using Umbraco.Cms.Core.IO;
+using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.PropertyEditors;
+using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Strings;
+using Umbraco.Cms.Infrastructure.Migrations;
+using Umbraco.Cms.Infrastructure.Packaging;
+
+namespace UmbracoTest1.Seed
+{
+	public class ContentMigration : PackageMigrationBase
+	{
+		// Keys z plików XML
+		private static readonly Guid OrgAContentKey = new("b0321c35-e481-4aed-8e09-ba64ccc12480");
+		private static readonly Guid OrgBContentKey = new("eeba8b8a-301b-4ed3-9a34-50bfecee8e24");
+
+		private readonly IMemberGroupService _memberGroupService;
+		private readonly IPublicAccessService _publicAccessService;
+		private readonly IContentService _contentService;
+
+		public ContentMigration(
+			IPackagingService packagingService,
+			IMediaService mediaService,
+			MediaFileManager mediaFileManager,
+			MediaUrlGeneratorCollection mediaUrlGenerators,
+			IShortStringHelper shortStringHelper,
+			IContentTypeBaseServiceProvider contentTypeBaseServiceProvider,
+			IMigrationContext context,
+			IOptions<PackageMigrationSettings> packageMigrationsSettings,
+			IMemberGroupService memberGroupService,
+			IPublicAccessService publicAccessService,
+			IContentService contentService)
+			: base(packagingService, mediaService, mediaFileManager, mediaUrlGenerators, shortStringHelper, contentTypeBaseServiceProvider, context, packageMigrationsSettings)
+		{
+			_memberGroupService = memberGroupService;
+			_publicAccessService = publicAccessService;
+			_contentService = contentService;
+		}
+
+		protected override async Task MigrateAsync()
+		{
+			ImportPackages();
+			await RestrictPublicAccessAsync();
+		}
+
+		private void ImportPackages()
+		{
+			// Filtrujemy tylko pliki XML z folderu Seed; .Order() gwarantuje kolejność: home, org-a, org-b
+			var resourceNames = GetType().Assembly.GetManifestResourceNames()
+				.Where(x => x.Contains(".Seed.") && x.EndsWith(".xml"))
+				.Order();
+
+			foreach (var resource in resourceNames)
+			{
+				using var stream = GetType().Assembly.GetManifestResourceStream(resource)!;
+				XDocument document = XDocument.Load(stream);
+				ImportPackage
+					.FromXmlDataManifest(document)
+					.Do();
+			}
+		}
+
+		private async void RestrictPublicAccess()
+		{
+			var loginPage = FindContent("login");
+			var accessDeniedPage = FindContent("access denied");
+
+			foreach (var content in _contentService.GetRootContent()
+				.Where(x => x.ContentType.Alias == "home" && x.Name != "Home"))
+			{
+
+				IMemberGroup grp = _memberGroupService.GetByName(content.Name);
+				if (grp is null)
+				{
+					grp = new MemberGroup { Name = content.Name };
+					await _memberGroupService.CreateAsync(grp);
+				}
+
+
+				await _publicAccessService.CreateAsync(new PublicAccessEntrySlim
+				{
+					ContentId = content.Key,
+					LoginPageId = loginPage.Key,
+					ErrorPageId = accessDeniedPage.Key,
+					MemberGroupNames = [grp.Name]
+				});
+
+			}
+		}
+
+		private IContent? FindContent(string name)
+		{
+			var result = _contentService.GetRootContent()
+				.Where(x => x.Name?.ToLowerInvariant() == name)
+				.FirstOrDefault();
+			return result;
+		}
+	}
+}

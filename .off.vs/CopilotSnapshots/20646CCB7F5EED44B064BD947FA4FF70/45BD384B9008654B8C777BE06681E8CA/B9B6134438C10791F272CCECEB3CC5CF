@@ -1,0 +1,129 @@
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
+using Pragmatic.Umbraco.VirtualMembers.Security;
+using System.Security.Claims;
+using Umbraco.Cms.Core.PublishedCache;
+using Umbraco.Cms.Core.Security;
+using Umbraco.Cms.Core.Services;
+
+namespace Pragmatic.Umbraco.VirtualMembers.Tests.Security;
+
+public sealed class VirtualMembersPublicAccessCheckerTests
+{
+    private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+    private readonly IPublicAccessService _publicAccessService = Substitute.For<IPublicAccessService>();
+    private readonly IPublishedContentCache _publishedContentCache = Substitute.For<IPublishedContentCache>();
+    private readonly IPublicAccessChecker _inner = Substitute.For<IPublicAccessChecker>();
+
+    private VirtualMembersPublicAccessChecker BuildChecker() =>
+        new(_httpContextAccessor, _publicAccessService, _publishedContentCache, _inner,
+            NullLogger<VirtualMembersPublicAccessChecker>.Instance);
+
+    private static ClaimsPrincipal PrincipalWithEmail(string email, params string[] roles)
+    {
+        var claims = new List<Claim> { new(ClaimTypes.Email, email) };
+        claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+        return new ClaimsPrincipal(new ClaimsIdentity(claims, "VirtualMembers"));
+    }
+
+    // ── HasMemberAccessToContentAsync(int) ───────────────────────────────────
+
+    [Fact]
+    public async Task HasMemberAccess_NoHttpContext_DelegatesToInner()
+    {
+        _httpContextAccessor.HttpContext.Returns((HttpContext?)null);
+        _inner.HasMemberAccessToContentAsync(42).Returns(PublicAccessStatus.AccessAccepted);
+
+        var result = await BuildChecker().HasMemberAccessToContentAsync(42);
+
+        Assert.Equal(PublicAccessStatus.AccessAccepted, result);
+        await _inner.Received(1).HasMemberAccessToContentAsync(42);
+    }
+
+    [Fact]
+    public async Task HasMemberAccess_HttpContextPresent_AuthFailed_DelegatesToInner()
+    {
+        var authService = Substitute.For<IAuthenticationService>();
+        authService.AuthenticateAsync(Arg.Any<HttpContext>(), VirtualMembersDefaults.Scheme)
+                   .Returns(AuthenticateResult.Fail("no cookie"));
+
+        var services = Substitute.For<IServiceProvider>();
+        services.GetService(typeof(IAuthenticationService)).Returns(authService);
+
+        var httpContext = new DefaultHttpContext { RequestServices = services };
+        _httpContextAccessor.HttpContext.Returns(httpContext);
+        _inner.HasMemberAccessToContentAsync(42).Returns(PublicAccessStatus.AccessDenied);
+
+        var result = await BuildChecker().HasMemberAccessToContentAsync(42);
+
+        Assert.Equal(PublicAccessStatus.AccessDenied, result);
+        await _inner.Received(1).HasMemberAccessToContentAsync(42);
+    }
+
+    // ── HasMemberAccessToContentAsync(int, ClaimsPrincipal) ──────────────────
+
+    [Fact]
+    public async Task HasMemberAccess_PrincipalWithoutEmail_DelegatesToInner()
+    {
+        var principal = new ClaimsPrincipal(new ClaimsIdentity()); // brak ClaimTypes.Email
+        _inner.HasMemberAccessToContentAsync(42, principal).Returns(PublicAccessStatus.AccessAccepted);
+
+        var result = await BuildChecker().HasMemberAccessToContentAsync(42, principal);
+
+        Assert.Equal(PublicAccessStatus.AccessAccepted, result);
+        await _inner.Received(1).HasMemberAccessToContentAsync(42, principal);
+    }
+
+    [Fact]
+    public async Task HasMemberAccess_ContentNotFound_ReturnsAccessAccepted()
+    {
+        _publishedContentCache.GetByIdAsync(99).Returns((Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent?)null);
+
+        var result = await BuildChecker()
+            .HasMemberAccessToContentAsync(99, PrincipalWithEmail("user@example.com"));
+
+        Assert.Equal(PublicAccessStatus.AccessAccepted, result);
+    }
+
+    [Fact]
+    public async Task HasMemberAccess_UserHasAccess_ReturnsAccessAccepted()
+    {
+        var content = Substitute.For<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>();
+        content.Path.Returns("-1,1000,1050");
+        _publishedContentCache.GetByIdAsync(1050).Returns(content);
+
+        _publicAccessService.HasAccessAsync(
+            "-1,1000,1050",
+            "user@example.com",
+            Arg.Any<Func<Task<IEnumerable<string>>>>())
+            .Returns(true);
+
+        var principal = PrincipalWithEmail("user@example.com", "editors");
+
+        var result = await BuildChecker().HasMemberAccessToContentAsync(1050, principal);
+
+        Assert.Equal(PublicAccessStatus.AccessAccepted, result);
+    }
+
+    [Fact]
+    public async Task HasMemberAccess_UserLacksRole_ReturnsAccessDenied()
+    {
+        var content = Substitute.For<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>();
+        content.Path.Returns("-1,1000,1050");
+        _publishedContentCache.GetByIdAsync(1050).Returns(content);
+
+        _publicAccessService.HasAccessAsync(
+            "-1,1000,1050",
+            "user@example.com",
+            Arg.Any<Func<Task<IEnumerable<string>>>>())
+            .Returns(false);
+
+        var principal = PrincipalWithEmail("user@example.com"); // brak roli
+
+        var result = await BuildChecker().HasMemberAccessToContentAsync(1050, principal);
+
+        Assert.Equal(PublicAccessStatus.AccessDenied, result);
+    }
+}

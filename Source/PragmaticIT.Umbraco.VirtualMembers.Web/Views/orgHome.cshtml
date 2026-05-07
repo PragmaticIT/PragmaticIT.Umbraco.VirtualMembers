@@ -1,0 +1,111 @@
+@using Umbraco.Cms.Web.Common.PublishedModels
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+@{
+    Layout = "layout.cshtml";
+    var organizationCode = @Model.Name.Replace("-",""); 
+    string organizationName;
+    string organizationBadgeCss;
+    string organizationIntro;
+    string organizationSecondaryText;
+
+    if (organizationCode == "OrgB")
+    {
+        organizationName = "Organization B";
+        organizationBadgeCss = "bg-success-subtle text-success border border-success-subtle";
+        organizationIntro = "This area is dedicated to members of Organization B.";
+        organizationSecondaryText =
+            "This page demonstrates that the same Umbraco instance can serve multiple " +
+            "organizations with isolated content and access rules, powered by virtual users.";
+    }
+    else
+    {
+        organizationCode = "OrgA"; // fallback
+        organizationName = "Organization A";
+        organizationBadgeCss = "bg-primary-subtle text-primary border border-primary-subtle";
+        organizationIntro = "Content and navigation are restricted to members of Organization A.";
+        organizationSecondaryText =
+            "If you can see this page, authorization for Organization A has been " +
+            "successfully applied. This area can host content, tools, and dashboards " +
+            "that are only relevant to A’s users.";
+    }
+
+    ViewData["Title"] = organizationName;
+    ViewData["CurrentSite"] = organizationCode; 
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h3 fw-semibold mb-1">@organizationName space</h1>
+                    <p class="text-muted mb-0">
+                        @organizationIntro
+                    </p>
+                </div>
+                <span class="badge @organizationBadgeCss">
+                    @organizationCode
+                </span>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h5 fw-semibold mb-2">Welcome to @organizationName</h2>
+                    <p class="text-muted mb-0">
+                        @organizationSecondaryText
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h3 class="h6 fw-semibold mb-2">
+                                @(organizationCode == "OrgB" ? "B-specific dashboard" : "Internal documents")
+                            </h3>
+                            <p class="text-muted small mb-0">
+                                @(organizationCode == "OrgB"
+                                    ? "Mock dashboard cards and KPIs for this organization."
+                                    : "Example section for organization-specific documentation and knowledge base.")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h3 class="h6 fw-semibold mb-2">
+                                @(organizationCode == "OrgB" ? "News & updates" : "Announcements")
+                            </h3>
+                            <p class="text-muted small mb-0">
+                                @(organizationCode == "OrgB"
+                                    ? "Sample news feed visible only for this tenant."
+                                    : "News, updates, and important messages dedicated to this organization.")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h3 class="h6 fw-semibold mb-2">Tools &amp; links</h3>
+                            <p class="text-muted small mb-0">
+                                Quick access to systems that only @organizationName users
+                                should see.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-muted small mt-4">
+                In a production setup, access to this node would be controlled by
+                virtual users and membership in @organizationName (@organizationCode).
+            </p>
+        </div>
+    </div>
+</div>

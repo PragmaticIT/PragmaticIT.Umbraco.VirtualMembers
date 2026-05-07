@@ -1,0 +1,136 @@
+﻿using Microsoft.Extensions.Options;
+using System.Xml.Linq;
+using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Configuration.Models;
+using Umbraco.Cms.Core.IO;
+using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.PropertyEditors;
+using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Strings;
+using Umbraco.Cms.Infrastructure.Migrations;
+using Umbraco.Cms.Infrastructure.Packaging;
+
+namespace UmbracoTest1.Seed
+{
+	public class ContentMigration : PackageMigrationBase
+	{
+		// Keys z plików XML
+		private static readonly Guid OrgAContentKey = new("b0321c35-e481-4aed-8e09-ba64ccc12480");
+		private static readonly Guid OrgBContentKey = new("eeba8b8a-301b-4ed3-9a34-50bfecee8e24");
+
+		private readonly IMemberGroupService _memberGroupService;
+		private readonly IPublicAccessService _publicAccessService;
+		private readonly IContentService _contentService;
+
+		public ContentMigration(
+			IPackagingService packagingService,
+			IMediaService mediaService,
+			MediaFileManager mediaFileManager,
+			MediaUrlGeneratorCollection mediaUrlGenerators,
+			IShortStringHelper shortStringHelper,
+			IContentTypeBaseServiceProvider contentTypeBaseServiceProvider,
+			IMigrationContext context,
+			IOptions<PackageMigrationSettings> packageMigrationsSettings,
+			IMemberGroupService memberGroupService,
+			IPublicAccessService publicAccessService,
+			IContentService contentService)
+			: base(packagingService, mediaService, mediaFileManager, mediaUrlGenerators, shortStringHelper, contentTypeBaseServiceProvider, context, packageMigrationsSettings)
+		{
+			_memberGroupService = memberGroupService;
+			_publicAccessService = publicAccessService;
+			_contentService = contentService;
+		}
+
+		protected override void Migrate()
+		{
+			ImportPackages();
+			CreateMemberGroups();
+			ConfigurePublicAccess();
+		}
+
+		private void ImportPackages()
+		{
+			// Filtrujemy tylko pliki XML z folderu Seed; .Order() gwarantuje kolejność: home, org-a, org-b
+			var resourceNames = GetType().Assembly.GetManifestResourceNames()
+				.Where(x => x.Contains(".Seed.") && x.EndsWith(".xml"))
+				.Order();
+
+			foreach (var resource in resourceNames)
+			{
+				using var stream = GetType().Assembly.GetManifestResourceStream(resource)!;
+				XDocument document = XDocument.Load(stream);
+				ImportPackage
+					.FromXmlDataManifest(document)
+					.Do();
+			}
+		}
+
+		private void CreateMemberGroups()
+		{
+			EnsureMemberGroup("Org-A");
+			EnsureMemberGroup("Org-B");
+		}
+
+		private void EnsureMemberGroup(string name)
+		{
+			if (_memberGroupService.GetByName(name) is null)
+				_memberGroupService.Save(new MemberGroup { Name = name });
+		}
+
+		private void ConfigurePublicAccess()
+		{
+			// Szukamy stron login i access-denied po URL slug (Name → lowercase-hyphenated)
+			var loginPage = FindContentByUrlName("login");
+			var accessDeniedPage = FindContentByUrlName("access-denied");
+
+			if (loginPage is null || accessDeniedPage is null)
+				return;
+
+			EnsurePublicAccess(OrgAContentKey, "Org-A", loginPage.Key, accessDeniedPage.Key);
+			EnsurePublicAccess(OrgBContentKey, "Org-B", loginPage.Key, accessDeniedPage.Key);
+		}
+
+		private void EnsurePublicAccess(Guid protectedNodeKey, string memberGroupName, Guid loginNodeKey, Guid noAccessNodeKey)
+		{
+			if (_publicAccessService.IsProtected(protectedNodeKey))
+				return;
+
+			_publicAccessService.Save(new PublicAccessEntry(
+				protectedNodeKey,
+				loginNodeKey,
+				noAccessNodeKey,
+				[new PublicAccessRule(memberGroupName, Constants.Conventions.PublicAccess.MemberRoleRuleType)]));
+		}
+
+		private IContent? FindContentByUrlName(string urlName)
+		{
+			foreach (var root in _contentService.GetRootContent())
+			{
+				if (ToUrlSegment(root.Name) == urlName)
+					return root;
+
+				var found = FindInChildren(root.Id, urlName);
+				if (found is not null)
+					return found;
+			}
+			return null;
+		}
+
+		private IContent? FindInChildren(int parentId, string urlName)
+		{
+			foreach (var child in _contentService.GetPagedChildren(parentId, 0, 1000, out _))
+			{
+				if (ToUrlSegment(child.Name) == urlName)
+					return child;
+
+				var found = FindInChildren(child.Id, urlName);
+				if (found is not null)
+					return found;
+			}
+			return null;
+		}
+
+		private static string ToUrlSegment(string? name)
+			=> (name ?? string.Empty).ToLowerInvariant().Replace(" ", "-");
+	}
+}

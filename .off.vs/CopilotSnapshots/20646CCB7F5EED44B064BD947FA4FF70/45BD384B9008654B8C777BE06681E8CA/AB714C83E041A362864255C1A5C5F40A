@@ -1,0 +1,113 @@
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging.Abstractions;
+using Xunit;
+using MsOptions = Microsoft.Extensions.Options.Options;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
+using Pragmatic.Umbraco.VirtualMembers.Models;
+using Pragmatic.Umbraco.VirtualMembers.Options;
+using Pragmatic.Umbraco.VirtualMembers.Providers;
+using Pragmatic.Umbraco.VirtualMembers.Services;
+
+namespace Pragmatic.Umbraco.VirtualMembers.Tests.Services;
+
+public sealed class VirtualMemberSignInServiceTests
+{
+    private readonly IVirtualMemberProvider _provider = Substitute.For<IVirtualMemberProvider>();
+    private readonly IAuthenticationService _authService = Substitute.For<IAuthenticationService>();
+
+    private VirtualMemberSignInService BuildService() => new(
+        _provider,
+        _authService,
+        MsOptions.Create(new VirtualMembersOptions()),
+        NullLogger<VirtualMemberSignInService>.Instance);
+
+    private static HttpContext BuildHttpContext(IAuthenticationService authService)
+    {
+        var services = Substitute.For<IServiceProvider>();
+        services.GetService(typeof(IAuthenticationService)).Returns(authService);
+        return new DefaultHttpContext { RequestServices = services };
+    }
+
+    // ── AuthenticateAsync ─────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task AuthenticateAsync_Succeeded_CallsSignIn_ReturnsSucceeded()
+    {
+        var profile = new VirtualMemberProfile { Email = "user@example.com", Groups = ["editors"] };
+        _provider.AuthenticateAsync(Arg.Any<AuthenticationContext>(), Arg.Any<CancellationToken>())
+                 .Returns(new AuthenticationResult.Succeeded(profile));
+
+        var result = await BuildService().AuthenticateAsync(
+            BuildHttpContext(_authService),
+            new AuthenticationContext { Email = "user@example.com" });
+
+        Assert.IsType<AuthenticationResult.Succeeded>(result);
+        await _authService.Received(1).SignInAsync(
+            Arg.Any<HttpContext>(),
+            VirtualMembersDefaults.Scheme,
+            Arg.Any<System.Security.Claims.ClaimsPrincipal>(),
+            Arg.Any<AuthenticationProperties>());
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_Failed_DoesNotSignIn_ReturnsFailed()
+    {
+        _provider.AuthenticateAsync(Arg.Any<AuthenticationContext>(), Arg.Any<CancellationToken>())
+                 .Returns(new AuthenticationResult.Failed("UserNotFound"));
+
+        var result = await BuildService().AuthenticateAsync(
+            BuildHttpContext(_authService),
+            new AuthenticationContext { Email = "user@example.com" });
+
+        var failed = Assert.IsType<AuthenticationResult.Failed>(result);
+        Assert.Equal("UserNotFound", failed.Reason);
+        await _authService.DidNotReceive().SignInAsync(
+            Arg.Any<HttpContext>(), Arg.Any<string>(),
+            Arg.Any<System.Security.Claims.ClaimsPrincipal>(), Arg.Any<AuthenticationProperties>());
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_ChallengeRequired_DoesNotSignIn_ReturnsChallengeRequired()
+    {
+        _provider.AuthenticateAsync(Arg.Any<AuthenticationContext>(), Arg.Any<CancellationToken>())
+                 .Returns(new AuthenticationResult.ChallengeRequired("otp-email", "tok-1"));
+
+        var result = await BuildService().AuthenticateAsync(
+            BuildHttpContext(_authService),
+            new AuthenticationContext { Email = "user@example.com" });
+
+        Assert.IsType<AuthenticationResult.ChallengeRequired>(result);
+        await _authService.DidNotReceive().SignInAsync(
+            Arg.Any<HttpContext>(), Arg.Any<string>(),
+            Arg.Any<System.Security.Claims.ClaimsPrincipal>(), Arg.Any<AuthenticationProperties>());
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_ProviderThrows_ReturnsFailed_WithExceptionReason()
+    {
+        _provider.AuthenticateAsync(Arg.Any<AuthenticationContext>(), Arg.Any<CancellationToken>())
+                 .ThrowsAsync(new InvalidOperationException("boom"));
+
+        var result = await BuildService().AuthenticateAsync(
+            BuildHttpContext(_authService),
+            new AuthenticationContext { Email = "user@example.com" });
+
+        var failed = Assert.IsType<AuthenticationResult.Failed>(result);
+        Assert.Equal("Exception", failed.Reason);
+    }
+
+    // ── SignOutAsync ──────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task SignOutAsync_CallsSignOut()
+    {
+        await BuildService().SignOutAsync(BuildHttpContext(_authService));
+
+        await _authService.Received(1).SignOutAsync(
+            Arg.Any<HttpContext>(),
+            VirtualMembersDefaults.Scheme,
+            null);
+    }
+}

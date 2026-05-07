@@ -1,0 +1,48 @@
+﻿name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build & Test (Umbraco ${{ matrix.umbraco }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false       # wszystkie wersje budują się niezależnie
+      matrix:
+        umbraco:
+          - "15.0.0"         # najstarsza wspierana (IPublishedContentCache.GetByIdAsync)
+          - "16.0.0"
+          - "17.3.4"         # najnowsza stabilna (fallback w csproj)
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.x"
+
+      - name: Restore
+        run: dotnet restore /p:UmbracoVersion=${{ matrix.umbraco }}
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release /p:UmbracoVersion=${{ matrix.umbraco }}
+
+      - name: Test
+        run: >
+          dotnet test --no-build --configuration Release
+          /p:UmbracoVersion=${{ matrix.umbraco }}
+          --collect:"XPlat Code Coverage"
+          --results-directory ./coverage
+
+      - name: Upload coverage
+        if: matrix.umbraco == '17.2.2'    # raport tylko dla głównej wersji
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: ./coverage

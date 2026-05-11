@@ -1,23 +1,22 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using PragmaticIT.Umbraco.VirtualMembers.Diagnostics;
 using PragmaticIT.Umbraco.VirtualMembers.Endpoints;
 using PragmaticIT.Umbraco.VirtualMembers.Middleware;
 using PragmaticIT.Umbraco.VirtualMembers.Providers;
 using PragmaticIT.Umbraco.VirtualMembers.Services;
 using PragmaticIT.Umbraco.VirtualMembers.Options;
 using PragmaticIT.Umbraco.VirtualMembers.Helpers;
-using PragmaticIT.Umbraco.VirtualMembers.Providers;
 using PragmaticIT.Umbraco.VirtualMembers.Providers.Csv;
 using PragmaticIT.Umbraco.VirtualMembers.Security;
-using PragmaticIT.Umbraco.VirtualMembers.Services;
 using PragmaticIT.Umbraco.VirtualMembers.Watchers;
 using Umbraco.Cms.Core.DependencyInjection;
+using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.PublishedCache;
 using Umbraco.Cms.Core.Security;
 using Umbraco.Cms.Core.Services;
@@ -58,6 +57,10 @@ public static class VirtualMembersUmbracoBuilderExtensions
 
         // Directory watcher
         services.AddHostedService<CsvDirectoryWatcher>();
+
+        // Startup diagnostics
+        builder.AddNotificationHandler<UmbracoApplicationStartingNotification,
+            VirtualMembersStartupNotificationHandler>();
 
         // Login view helper
         services.AddScoped<IVirtualMembersLoginViewHelper, VirtualMembersLoginViewHelper>();

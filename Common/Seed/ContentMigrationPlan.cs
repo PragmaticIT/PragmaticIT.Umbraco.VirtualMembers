@@ -10,9 +10,9 @@ namespace SampleSeed
 
 		protected override void DefinePlan()
 		{
-
 			To<ImportDataMigration>("content-seed-v1");
-			To<RestrictPublicAccessMigration>("content-seed-v4");
+			To<FixTemplateAssignment>("content-seed-v2");
+			To<RestrictPublicAccessMigration>("content-seed-v3");
 		}
 	}
 }

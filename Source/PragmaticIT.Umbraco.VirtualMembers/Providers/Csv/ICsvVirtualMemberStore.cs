@@ -5,13 +5,13 @@ namespace PragmaticIT.Umbraco.VirtualMembers.Providers.Csv;
 public interface ICsvVirtualMemberStore
 {
     /// <summary>
-    /// Zwraca mapę: email -> profil (wraz z grupami) zcache'owaną na podstawie plików CSV.
+    /// Returns a map of normalised e-mail → member profile (including groups), cached from the CSV files.
     /// </summary>
     Task<IReadOnlyDictionary<string, VirtualMemberProfile>> GetAllProfilesAsync(
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Invaliduje cache – powinno być wywołane przez watcher.
+    /// Invalidates the in-memory cache. Should be called by the file watcher when a CSV file changes.
     /// </summary>
     void Invalidate();
 }

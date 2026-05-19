@@ -1,20 +1,21 @@
 namespace PragmaticIT.Umbraco.VirtualMembers.Models;
 
 /// <summary>
-/// Niesie wszystko, co provider potrzebuje do podjęcia decyzji w danym kroku.
-/// Przy pierwszym wywołaniu wypełniony jest tylko Email.
-/// Przy kolejnych krokach (OTP, 2FA) obecne są ChallengeToken i Factors.
+/// Carries all data a provider needs to make a decision at a given authentication step.
+/// On the first call only <see cref="Email"/> is populated.
+/// On subsequent steps (OTP, MFA) <see cref="ChallengeToken"/> and <see cref="Factors"/> are also present.
 /// </summary>
 public sealed record AuthenticationContext
 {
+    /// <summary>E-mail address submitted by the member. May be empty on challenge steps when it is encoded inside the token.</summary>
     public required string Email { get; init; }
 
-    /// <summary>Nieprzezroczysty token wydany przez provider w poprzednim kroku.</summary>
+    /// <summary>Opaque token issued by the provider in the previous step.</summary>
     public string? ChallengeToken { get; init; }
 
     /// <summary>
-    /// Odpowiedzi użytkownika na challenge (np. "otp-email" → "123456").
-    /// Kluczami są typy zadeklarowane przez <see cref="AuthenticationResult.ChallengeRequired"/>.
+    /// Member's responses to the challenge, keyed by factor type (e.g. <c>"otp-email"</c> → <c>"123456"</c>).
+    /// Keys are the challenge types declared by <see cref="AuthenticationResult.ChallengeRequired"/>.
     /// </summary>
     public IReadOnlyDictionary<string, string> Factors { get; init; }
         = new Dictionary<string, string>();

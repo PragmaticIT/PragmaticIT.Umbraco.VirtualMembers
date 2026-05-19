@@ -10,6 +10,10 @@ using UmbracoModels = Umbraco.Cms.Core.Models;
 
 namespace PragmaticIT.Umbraco.VirtualMembers.Watchers;
 
+/// <summary>
+/// Hosted background service that watches the configured CSV directory for file changes
+/// and invalidates the <see cref="ICsvVirtualMemberStore"/> cache when a change is detected.
+/// </summary>
 public sealed class CsvDirectoryWatcher : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
@@ -18,6 +22,7 @@ public sealed class CsvDirectoryWatcher : BackgroundService
     private readonly ILogger<CsvDirectoryWatcher> _logger;
     private FileSystemWatcher? _watcher;
 
+    /// <summary>Initialises a new instance with all required dependencies.</summary>
     public CsvDirectoryWatcher(
         IServiceProvider serviceProvider,
         IOptions<VirtualMembersOptions> options,
@@ -30,6 +35,7 @@ public sealed class CsvDirectoryWatcher : BackgroundService
         _logger = logger;
     }
 
+    /// <inheritdoc />
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!_options.Csv.Watch)

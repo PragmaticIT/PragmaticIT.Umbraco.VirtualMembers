@@ -24,8 +24,13 @@ using Umbraco.Cms.Web.Common.ApplicationBuilder;
 
 namespace PragmaticIT.Umbraco.VirtualMembers.Extensions;
 
+/// <summary>Extension methods on <see cref="IUmbracoBuilder"/> for registering VirtualMembers services.</summary>
 public static class VirtualMembersUmbracoBuilderExtensions
 {
+    /// <summary>
+    /// Registers all VirtualMembers services, middleware, authentication scheme and endpoints.
+    /// Call inside <c>IComposer.Compose</c> or use the auto-registered <see cref="VirtualMembersComposer"/>.
+    /// </summary>
     public static IUmbracoBuilder AddVirtualMembers(this IUmbracoBuilder builder)
     {
         var services = builder.Services;

@@ -9,6 +9,11 @@ using System.Security.Claims;
 
 namespace PragmaticIT.Umbraco.VirtualMembers.Services;
 
+/// <summary>
+/// Default implementation of <see cref="IVirtualMemberSignInService"/>.
+/// Delegates to <see cref="IVirtualMemberProvider"/>, issues a session cookie on success,
+/// and writes structured audit log entries for every outcome.
+/// </summary>
 public sealed class VirtualMemberSignInService : IVirtualMemberSignInService
 {
     private readonly IVirtualMemberProvider _provider;
@@ -16,6 +21,7 @@ public sealed class VirtualMemberSignInService : IVirtualMemberSignInService
     private readonly VirtualMembersOptions _options;
     private readonly ILogger<VirtualMemberSignInService> _logger;
 
+    /// <summary>Initialises a new instance with all required dependencies.</summary>
     public VirtualMemberSignInService(
         IVirtualMemberProvider provider,
         IAuthenticationService authenticationService,
@@ -28,6 +34,7 @@ public sealed class VirtualMemberSignInService : IVirtualMemberSignInService
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task<AuthenticationResult> AuthenticateAsync(
         HttpContext httpContext,
         AuthenticationContext context,

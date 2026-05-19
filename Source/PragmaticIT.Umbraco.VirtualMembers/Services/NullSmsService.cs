@@ -4,8 +4,8 @@ using Microsoft.Extensions.Logging;
 namespace PragmaticIT.Umbraco.VirtualMembers.Services;
 
 /// <summary>
-/// Implementacja no-op używana gdy żaden rzeczywisty dostawca SMS nie jest zarejestrowany.
-/// Loguje ostrzeżenie zamiast wysyłać wiadomość – bezpieczna w środowisku demo/dev.
+/// No-op implementation used when no real SMS provider is registered.
+/// Logs a warning instead of sending a message – safe for demo and development environments.
 /// </summary>
 internal sealed class NullSmsService : IVirtualMemberSmsService
 {

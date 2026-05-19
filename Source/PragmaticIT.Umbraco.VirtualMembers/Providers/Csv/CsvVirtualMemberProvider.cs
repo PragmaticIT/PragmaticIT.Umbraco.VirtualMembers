@@ -7,6 +7,11 @@ using PragmaticIT.Umbraco.VirtualMembers.Services;
 
 namespace PragmaticIT.Umbraco.VirtualMembers.Providers.Csv;
 
+/// <summary>
+/// <see cref="IVirtualMemberProvider"/> implementation that authenticates members
+/// against profiles loaded from CSV files via <see cref="ICsvVirtualMemberStore"/>.
+/// Supports <see cref="AuthMode.None"/>, <see cref="AuthMode.Otp"/>, and <see cref="AuthMode.Mfa"/>.
+/// </summary>
 public sealed class CsvVirtualMemberProvider : IVirtualMemberProvider
 {
     private const string OtpEmailFactor = "otp-email";
@@ -17,6 +22,7 @@ public sealed class CsvVirtualMemberProvider : IVirtualMemberProvider
     private readonly VirtualMembersOptions _options;
     private readonly ILogger<CsvVirtualMemberProvider> _logger;
 
+    /// <summary>Initialises a new instance with all required dependencies.</summary>
     public CsvVirtualMemberProvider(
         ICsvVirtualMemberStore store,
         IOtpService otpService,
@@ -29,6 +35,7 @@ public sealed class CsvVirtualMemberProvider : IVirtualMemberProvider
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task<AuthenticationResult> AuthenticateAsync(
         AuthenticationContext context,
         CancellationToken cancellationToken = default)

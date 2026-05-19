@@ -8,6 +8,10 @@ using System.Text;
 
 namespace PragmaticIT.Umbraco.VirtualMembers.Providers.Csv;
 
+/// <summary>
+/// In-memory cache of virtual member profiles loaded from CSV files.
+/// Cache is invalidated on expiry (<see cref="VirtualMembersOptions.CsvOptions.CacheMinutes"/>) or on explicit <see cref="Invalidate"/> call from the file watcher.
+/// </summary>
 public sealed class CsvVirtualMemberStore : ICsvVirtualMemberStore
 {
     private readonly VirtualMembersOptions _options;
@@ -18,6 +22,7 @@ public sealed class CsvVirtualMemberStore : ICsvVirtualMemberStore
     private IReadOnlyDictionary<string, VirtualMemberProfile> _cache =
         new Dictionary<string, VirtualMemberProfile>(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Initialises a new instance with all required dependencies.</summary>
     public CsvVirtualMemberStore(
         IOptions<VirtualMembersOptions> options,
         IHostEnvironment hostEnvironment,
@@ -28,6 +33,7 @@ public sealed class CsvVirtualMemberStore : ICsvVirtualMemberStore
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public Task<IReadOnlyDictionary<string, VirtualMemberProfile>> GetAllProfilesAsync(
         CancellationToken cancellationToken = default)
     {
@@ -43,6 +49,7 @@ public sealed class CsvVirtualMemberStore : ICsvVirtualMemberStore
         }
     }
 
+    /// <inheritdoc />
     public void Invalidate()
     {
         lock (_syncRoot)

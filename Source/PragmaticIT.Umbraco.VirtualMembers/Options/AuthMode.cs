@@ -2,12 +2,12 @@ namespace PragmaticIT.Umbraco.VirtualMembers.Options;
 
 public enum AuthMode
 {
-	/// <summary>Tylko e-mail, bez dodatkowej weryfikacji. Tryb domyślny / demo.</summary>
+	/// <summary>E-mail only, no additional verification. Default / demo mode.</summary>
 	None,
 
-	/// <summary>Jednorazowy kod (OTP) wysyłany na adres e-mail.</summary>
+	/// <summary>A one-time code (OTP) is sent to the member's e-mail address.</summary>
 	Otp,
 
-	/// <summary>Kod na e-mail oraz osobny kod na SMS – oba wymagane.</summary>
+	/// <summary>An OTP sent to e-mail and a separate OTP sent via SMS – both are required.</summary>
 	Mfa
 }

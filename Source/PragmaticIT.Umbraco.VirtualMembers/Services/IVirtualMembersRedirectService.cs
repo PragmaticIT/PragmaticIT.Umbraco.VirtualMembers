@@ -5,9 +5,9 @@ namespace PragmaticIT.Umbraco.VirtualMembers.Services;
 public interface IVirtualMembersRedirectService
 {
     /// <summary>
-    /// Na podstawie zalogowanego użytkownika próbuje odnaleźć
-    /// top-level node z dostępem dla którejkolwiek jego grup.
-    /// Zwraca URL lub null.
+    /// Attempts to find a top-level Umbraco content node that is accessible
+    /// by at least one of the authenticated member's groups.
+    /// Returns the URL of the first matching node, or <c>null</c> when none is found.
     /// </summary>
     Task<string?> GetPreferredContentUrlForUserAsync(
         ClaimsPrincipal user,

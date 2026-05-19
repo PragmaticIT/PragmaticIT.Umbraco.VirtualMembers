@@ -6,12 +6,17 @@ using Umbraco.Extensions;
 
 namespace PragmaticIT.Umbraco.VirtualMembers.Services;
 
+/// <summary>
+/// Default implementation of <see cref="IVirtualMembersRedirectService"/>.
+/// Traverses the Umbraco content tree to find a top-level node accessible by the member's groups.
+/// </summary>
 public sealed class VirtualMembersRedirectService : IVirtualMembersRedirectService
 {
     private readonly UmbracoHelper _umbracoHelper;
     private readonly IPublishedUrlProvider _publishedUrlProvider;
     private readonly ILogger<VirtualMembersRedirectService> _logger;
 
+    /// <summary>Initialises a new instance with all required dependencies.</summary>
     public VirtualMembersRedirectService(
         UmbracoHelper umbracoHelper,
         IPublishedUrlProvider publishedUrlProvider,
@@ -22,6 +27,7 @@ public sealed class VirtualMembersRedirectService : IVirtualMembersRedirectServi
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public Task<string?> GetPreferredContentUrlForUserAsync(
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default)

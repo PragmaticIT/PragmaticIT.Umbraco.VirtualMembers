@@ -5,11 +5,16 @@ using PragmaticIT.Umbraco.VirtualMembers.Models;
 
 namespace PragmaticIT.Umbraco.VirtualMembers.Providers;
 
+/// <summary>
+/// Composite <see cref="IVirtualMemberProvider"/> that fans out to all registered leaf providers,
+/// merges their profiles, and forwards the first challenge it encounters.
+/// </summary>
 public sealed class VirtualMemberProviderAggregator : IVirtualMemberProvider
 {
     private readonly IReadOnlyList<IVirtualMemberProvider> _providers;
     private readonly ILogger<VirtualMemberProviderAggregator> _logger;
 
+    /// <summary>Initialises the aggregator with all keyed leaf providers.</summary>
     public VirtualMemberProviderAggregator(
         [FromKeyedServices(VirtualMembersProviderKeys.Leaf)] IEnumerable<IVirtualMemberProvider> providers,
         ILogger<VirtualMemberProviderAggregator> logger)
@@ -18,6 +23,7 @@ public sealed class VirtualMemberProviderAggregator : IVirtualMemberProvider
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task<AuthenticationResult> AuthenticateAsync(
         AuthenticationContext context,
         CancellationToken cancellationToken = default)

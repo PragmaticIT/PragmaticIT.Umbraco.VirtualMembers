@@ -190,4 +190,54 @@ namespace SampleSeed
 			_contentService.GetRootContent()
 				.FirstOrDefault(x => x.Name?.ToLowerInvariant() == name);
 	}
+
+	public class InsertCreatedPackagesMigration : MigrationBase
+	{
+		private static readonly (string Name, string PackageId, string ContentNodeKey, bool LoadChildNodes, string Templates, string DocumentTypes)[] Packages =
+		[
+			("Home",         "EA77E2E6-8AB5-4F4D-AFBB-79D0D6DE4B27", "46c54847-aae8-49ae-bf43-d0b5b826d431", true,  "8fcf871c-9953-4e77-bee2-4dd8d63b520c,d2d3be78-39e3-4495-ac93-26e5259d35ec,1f4b1e34-b592-4d3a-b491-3310778c3986,fed8ff24-a87a-4449-af25-f8c8b0182645,1684409d-8222-42c7-8c6a-0e7842e73a14,15d92034-4e30-4a25-8aca-ffe4f9e2a633,764bbe1b-7c86-4f35-aa78-01307d698270", "136c4488-6eab-4e89-b470-f229bccdb09e,17f89006-7820-440a-8e85-fc23f3092c4a,65d1f4c5-0b4f-4db6-817f-ce7d834b5475"),
+			("Org-A",        "B96FBAE1-2A28-47D8-95CE-A8C9EAFB559B", "b0321c35-e481-4aed-8e09-ba64ccc12480", true,  "", ""),
+			("Org-B",        "63EEA4FE-EAB5-4921-9341-BB50096FB5BB", "eeba8b8a-301b-4ed3-9a34-50bfecee8e24", true,  "", ""),
+			("Login",        "7A9496FD-6DD7-48F6-B184-AFE88087DD98", "b7717056-02d1-4eab-972b-784de7df23f4", false, "", ""),
+			("Logout",       "36568065-C885-4BC2-BAA9-EC22D27981F0", "10219e40-1e67-490c-a394-7bc24bad45d1", false, "", ""),
+			("Access Denied","4DFF3149-ACFC-4987-B272-226D989C6B69", "d36afb30-271a-46b6-9353-482e3148b9e0", false, "", ""),
+		];
+
+		public InsertCreatedPackagesMigration(IMigrationContext context) : base(context)
+		{
+		}
+
+		protected override void Migrate()
+		{
+			foreach (var (name, packageId, contentNodeKey, loadChildNodes, templates, documentTypes) in Packages)
+			{
+				var value = BuildPackageXml(name, packageId, contentNodeKey, loadChildNodes, templates, documentTypes);
+				Database.Execute(
+					"INSERT INTO umbracoCreatedPackageSchema (name, value, updateDate, packageId) VALUES (@0, @1, @2, @3)",
+					name,
+					value,
+					DateTime.UtcNow.ToString("O"),
+					packageId.ToUpperInvariant());
+			}
+
+			Context.Complete();
+		}
+
+		private static string BuildPackageXml(string name, string packageId, string contentNodeKey, bool loadChildNodes, string templates, string documentTypes) =>
+			$"""
+			<package name="{name}" packageGuid="{packageId.ToLowerInvariant()}">
+			  <datatypes></datatypes>
+			  <content nodeId="{contentNodeKey}" loadChildNodes="{(loadChildNodes ? "true" : "false")}" />
+			  <templates>{templates}</templates>
+			  <stylesheets></stylesheets>
+			  <scripts></scripts>
+			  <partialViews></partialViews>
+			  <documentTypes>{documentTypes}</documentTypes>
+			  <mediaTypes></mediaTypes>
+			  <languages></languages>
+			  <dictionaryitems></dictionaryitems>
+			  <media loadChildNodes="false" />
+			</package>
+			""";
+	}
 }

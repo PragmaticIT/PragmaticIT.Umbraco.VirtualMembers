@@ -46,6 +46,55 @@ Virtual Members lets you protect Umbraco content nodes with a lightweight authen
 See **[docs/USAGE.md](docs/USAGE.md)** for the full step-by-step guide:
 install the package → configure `appsettings.json` → add CSV member lists → add view templates.
 
+---
+
+## Running the development projects
+
+Both `Source/PragmaticIT.Umbraco.VirtualMembers.Web` and `Examples/VirtualMembersTest` are **self-initialising**.  
+After a fresh checkout there is no database to restore and no manual backoffice setup required.
+
+### Steps
+
+1. Clone or check out the repository.
+2. Run the project (`F5` or `dotnet run`).
+3. Umbraco's unattended installer creates a fresh SQLite database automatically.
+4. On first boot the seed migration runs and installs:
+   - document types, content tree (Home, Org-A, Org-B, Login, Logout, Access Denied)
+   - template records in the database (Razor views are already present on disk from the repo)
+   - public access rules (Org-A and Org-B nodes protected by member groups)
+   - `Created Packages` definitions (Home, Org-A, Org-B, Login, Logout, Access Denied) so packages can be re-exported from the backoffice
+5. **Restart the application after the first boot.** The seed migration runs during startup before all Umbraco services are fully warm; a second start is required for the published content cache and routing to work correctly.
+
+> The database file (`umbraco/Data/Umbraco.sqlite.db`) is excluded from the repository via `.gitignore`.  
+> Credentials for the default admin account are configured in `appsettings.json` under `Umbraco:CMS:Unattended`.
+
+---
+
+## Updating seed packages (templates, document types, content)
+
+The XML files in `Common/Seed/` are the source of truth for the content structure.  
+They are embedded resources compiled into the assembly and applied once, on a fresh database, via `PackageMigrationPlan`.
+
+When you need to change templates, document types, or content nodes and want those changes to be reproducible on a fresh checkout, follow this process:
+
+### Updating templates (`.cshtml` files)
+
+1. Edit the `.cshtml` file on disk — it is the primary source.
+2. Open the backoffice, go to **Packages → Created**, open the relevant package (e.g. `Home`), and click **Update** then **Download**.
+3. Replace the corresponding XML file in `Common/Seed/` with the downloaded `package.xml`, renaming it to match the existing convention (`home.xml`, `org-a.xml`, etc.).
+4. Commit both the updated `.cshtml` and the updated XML.
+
+> The seed migration only runs on a **fresh** database (migration state `content-seed-step1` not yet recorded).  
+> Existing databases are not affected — the `.cshtml` file on disk is always used at runtime regardless.
+
+### Updating document types or content nodes
+
+1. Make changes in the backoffice.
+2. Re-export the affected package via **Packages → Created → Download**.
+3. Replace the XML file in `Common/Seed/` and commit.
+
+---
+
 ## Architecture & internals
 
 See **[docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)** for a deep-dive into the authentication pipeline, provider model, middleware, and extension points.

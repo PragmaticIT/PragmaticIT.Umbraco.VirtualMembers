@@ -6,17 +6,17 @@
     <CompressionEnabled>false</CompressionEnabled> <!-- Disable compression. E.g. for umbraco backoffice files. These files should be precompressed by node and not let dotnet handle it -->
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Common\Seed\ContentInstaller.cs" Link="Seed\ContentInstaller.cs" />
-    <Compile Include="..\Common\Seed\ContentMigrationComposer.cs" Link="Seed\ContentMigrationComposer.cs" />
-    <Compile Include="..\Common\Seed\ContentMigrationPlan.cs" Link="Seed\ContentMigrationPlan.cs" />
+    <Compile Include="..\..\Common\Seed\ContentInstaller.cs" Link="Seed\ContentInstaller.cs" />
+    <Compile Include="..\..\Common\Seed\ContentMigrationComposer.cs" Link="Seed\ContentMigrationComposer.cs" />
+    <Compile Include="..\..\Common\Seed\ContentMigrationPlan.cs" Link="Seed\ContentMigrationPlan.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\Common\Seed\access-denied.xml" Link="Seed\access-denied.xml" />
-    <EmbeddedResource Include="..\Common\Seed\home.xml" Link="Seed\home.xml" />
-    <EmbeddedResource Include="..\Common\Seed\login.xml" Link="Seed\login.xml" />
-    <EmbeddedResource Include="..\Common\Seed\logout.xml" Link="Seed\logout.xml" />
-    <EmbeddedResource Include="..\Common\Seed\org-a.xml" Link="Seed\org-a.xml" />
-    <EmbeddedResource Include="..\Common\Seed\org-b.xml" Link="Seed\org-b.xml" />
+    <EmbeddedResource Include="..\..\Common\Seed\access-denied.xml" Link="Seed\access-denied.xml" />
+    <EmbeddedResource Include="..\..\Common\Seed\home.xml" Link="Seed\home.xml" />
+    <EmbeddedResource Include="..\..\Common\Seed\login.xml" Link="Seed\login.xml" />
+    <EmbeddedResource Include="..\..\Common\Seed\logout.xml" Link="Seed\logout.xml" />
+    <EmbeddedResource Include="..\..\Common\Seed\org-a.xml" Link="Seed\org-a.xml" />
+    <EmbeddedResource Include="..\..\Common\Seed\org-b.xml" Link="Seed\org-b.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,10 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Common\Member Lists\Org-A.csv" Link="Member Lists\Org-A.csv">
+    <None Include="..\..\Common\Member Lists\Org-A.csv" Link="Member Lists\Org-A.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\Common\Member Lists\Org-B.csv" Link="Member Lists\Org-B.csv">
+    <None Include="..\..\Common\Member Lists\Org-B.csv" Link="Member Lists\Org-B.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

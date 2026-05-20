@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PragmaticIT.Umbraco.VirtualMembers.Helpers;
 using PragmaticIT.Umbraco.VirtualMembers.Options;
 using PragmaticIT.Umbraco.VirtualMembers.Services;
 using Umbraco.Cms.Core.Events;
@@ -16,17 +18,20 @@ internal sealed class VirtualMembersStartupNotificationHandler
 
     private readonly IConfiguration _configuration;
     private readonly IOptions<VirtualMembersOptions> _options;
+    private readonly IHostEnvironment _hostEnvironment;
     private readonly IVirtualMemberSmsService _smsService;
     private readonly ILogger<VirtualMembersStartupNotificationHandler> _logger;
 
     public VirtualMembersStartupNotificationHandler(
         IConfiguration configuration,
         IOptions<VirtualMembersOptions> options,
+        IHostEnvironment hostEnvironment,
         IVirtualMemberSmsService smsService,
         ILogger<VirtualMembersStartupNotificationHandler> logger)
     {
         _configuration = configuration;
         _options = options;
+        _hostEnvironment = hostEnvironment;
         _smsService = smsService;
         _logger = logger;
     }
@@ -67,7 +72,7 @@ internal sealed class VirtualMembersStartupNotificationHandler
 
         var resolved = Path.IsPathRooted(csv.Directory)
             ? csv.Directory
-            : Path.GetFullPath(csv.Directory);
+            : VirtualMembersPathHelper.ResolvePath(csv.Directory, _hostEnvironment.ContentRootPath);
 
         if (!Directory.Exists(resolved))
         {

@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11626.88
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{BE033CFA-1736-4365-A4B4-6AD7D82EB6AD}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03 Source", "03 Source", "{BE033CFA-1736-4365-A4B4-6AD7D82EB6AD}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{9DCA88F1-CA17-4638-83DA-D651ED95C21C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04 Examples", "04 Examples", "{9DCA88F1-CA17-4638-83DA-D651ED95C21C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PragmaticIT.Umbraco.VirtualMembers", "Source\PragmaticIT.Umbraco.VirtualMembers\PragmaticIT.Umbraco.VirtualMembers.csproj", "{C1D2E3F4-A5B6-7890-CDEF-123456789ABC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PragmaticIT.Umbraco.VirtualMembers.Web", "Source\PragmaticIT.Umbraco.VirtualMembers.Web\PragmaticIT.Umbraco.VirtualMembers.Web.csproj", "{D2E3F4A5-B6C7-8901-DEF0-234567890ABC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{CDA6883F-9837-4AC7-A25D-59219DF1ABEE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02 Common", "02 Common", "{CDA6883F-9837-4AC7-A25D-59219DF1ABEE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Seed", "Seed", "{F34B7A0C-636A-4867-90BD-B15CDA556BAE}"
 	ProjectSection(SolutionItems) = preProject
@@ -32,13 +32,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Member lists", "Member list
 		Common\Member Lists\Org-B.csv = Common\Member Lists\Org-B.csv
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "05 Tests", "05 Tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PragmaticIT.Umbraco.VirtualMembers.Tests", "Tests\PragmaticIT.Umbraco.VirtualMembers.Tests\PragmaticIT.Umbraco.VirtualMembers.Tests.csproj", "{6177C316-2E4F-4ED6-9101-50297A328870}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6BAF5E6D-1DC9-49B5-BC70-D495ACAB5211}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01 Docs", "01 Docs", "{6BAF5E6D-1DC9-49B5-BC70-D495ACAB5211}"
 	ProjectSection(SolutionItems) = preProject
+		docs\IMPLEMENTATION.md = docs\IMPLEMENTATION.md
 		README.md = README.md
+		docs\README.nuget.md = docs\README.nuget.md
+		docs\USAGE.md = docs\USAGE.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualMembersTest", "Examples\VirtualMembersTest\VirtualMembersTest.csproj", "{51BEF6D8-C543-8C09-7B82-036B23DE210F}"

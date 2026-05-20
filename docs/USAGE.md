@@ -52,7 +52,7 @@ Add a `VirtualMembers` section to `appsettings.json`. All values below are the d
       "PostLogoutRedirectUrl": "/"
     },
     "Csv": {
-      "Directory": "App_Data/VirtualMembers",
+      "Directory": "|DataDirectory|/VirtualMembers",
       "FilePattern": "*.csv",
       "CacheMinutes": 5,
       "Watch": true
@@ -69,22 +69,23 @@ Add a `VirtualMembers` section to `appsettings.json`. All values below are the d
 | `Auth.LogoutPath` | URL of the **POST endpoint** that processes logout. Must match the `action` attribute of your logout form. |
 | `Auth.LoginViewPath` | URL of the **Razor view** that renders the login page. Umbraco will rewrite protected page requests to this URL. |
 | `Auth.Mode` | `None` (email only) · `Otp` (email + one-time code) · `Mfa` (email code + SMS code). See [section 6](#6-authentication-modes). |
-| `Csv.Directory` | Path to the folder containing member list CSV files. Relative paths are resolved from the application content root. |
+| `Csv.Directory` | Path to the folder containing member list CSV files. Supports `\|DataDirectory\|` (→ `umbraco/Data`), `~/` relative to content root, and absolute paths. |
 | `Redirect.PostLoginRedirectUrl` | Where to send the user after a successful login when no `returnUrl` is present. |
 
 ---
 
 ## 3. Add member list CSV files
 
-Create the directory configured in `Csv.Directory` (default `App_Data/VirtualMembers`) and add one or more `.csv` files.
+Create the directory configured in `Csv.Directory` (default `umbraco/Data/VirtualMembers`) and add one or more `.csv` files.
 
 **The file name (without extension) becomes the member group name.**
 
 ```
-App_Data/
-└── VirtualMembers/
-    ├── Org-A.csv
-    └── Org-B.csv
+umbraco/
+└── Data/
+    └── VirtualMembers/
+        ├── Org-A.csv
+        └── Org-B.csv
 ```
 
 ### CSV format

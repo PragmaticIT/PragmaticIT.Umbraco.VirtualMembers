@@ -76,8 +76,8 @@ public sealed class VirtualMembersOptions
     /// <summary>CSV member store settings.</summary>
     public sealed class CsvOptions
     {
-        /// <summary>Directory (relative to content root or absolute) containing the member CSV files.</summary>
-        public string Directory { get; set; } = "App_Data/VirtualMembers";
+        /// <summary>Directory containing the member CSV files. Supports <c>|DataDirectory|</c> substitution (Umbraco sets this to <c>umbraco/Data</c>), <c>~/</c> relative to content root, and absolute paths.</summary>
+        public string Directory { get; set; } = "|DataDirectory|/VirtualMembers";
 
         /// <summary>Glob pattern used to enumerate CSV files inside <see cref="Directory"/>.</summary>
         public string FilePattern { get; set; } = "*.csv";

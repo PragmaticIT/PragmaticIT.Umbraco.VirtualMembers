@@ -27,7 +27,7 @@
     <RepositoryUrl>https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReadmeFile>README.nuget.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/releases</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -38,7 +38,7 @@
   <ItemGroup>
     <!-- Required for Microsoft.AspNetCore.* types (IHttpContextAccessor, IAuthenticationService, etc.) -->
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\docs\README.nuget.md" Pack="true" PackagePath="\" />
     <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
   </ItemGroup>
 

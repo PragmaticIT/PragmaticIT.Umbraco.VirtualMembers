@@ -35,8 +35,8 @@ Virtual Members lets you protect Umbraco content nodes with a lightweight authen
 │   ├── PragmaticIT.Umbraco.VirtualMembers/          # ← The NuGet library
 │   └── PragmaticIT.Umbraco.VirtualMembers.Web/      # Local test host (references the library directly)
 │
-└── Example/                   # Example project referencing the published NuGet package
-    └── UmbracoProject*/       # (work in progress — see docs/USAGE.md)
+└── Examples/                   # Example project referencing the published NuGet package
+    └── VirtualMembersTest/     # Minimal sample application demonstrating package usage in a clean Umbraco setup
 ```
 
 ---

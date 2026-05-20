@@ -1,3 +1,4 @@
+using System.IO.Enumeration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -80,6 +81,11 @@ public sealed class CsvDirectoryWatcher : BackgroundService
 
     private void HandleFileEvent(string fullPath)
     {
+        if (!FileSystemName.MatchesSimpleExpression(_options.Csv.WatchFilter, Path.GetFileName(fullPath)))
+        {
+            return;
+        }
+
         if (!File.Exists(fullPath))
         {
             InvalidateStore();

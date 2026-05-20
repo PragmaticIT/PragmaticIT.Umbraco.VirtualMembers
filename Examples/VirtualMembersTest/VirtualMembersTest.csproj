@@ -31,6 +31,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\Common\Member Lists\Org-A.csv" Link="Member Lists\Org-A.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Common\Member Lists\Org-B.csv" Link="Member Lists\Org-B.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Seed\" />
   </ItemGroup>
 

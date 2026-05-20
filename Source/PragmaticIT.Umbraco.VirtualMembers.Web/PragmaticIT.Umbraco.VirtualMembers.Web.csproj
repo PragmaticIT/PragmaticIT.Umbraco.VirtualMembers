@@ -19,10 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Member Lists\Org-A.csv">
+    <None Include="..\..\Common\Member Lists\Org-A.csv" Link="Member Lists\Org-A.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Member Lists\Org-B.csv">
+    <None Include="..\..\Common\Member Lists\Org-B.csv" Link="Member Lists\Org-B.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

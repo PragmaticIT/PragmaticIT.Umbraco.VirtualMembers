@@ -466,6 +466,9 @@ $RECYCLE.BIN/
 /Views/logout.cshtml
 /Views/orgHome.cshtml
 
+# CSV member lists copied from Common/Member Lists at build time — do not commit
+/Member Lists/
+
 # JSON schema files for appsettings.json
 appsettings-schema.json
 appsettings-schema.*.json

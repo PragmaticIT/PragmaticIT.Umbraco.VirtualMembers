@@ -30,14 +30,10 @@
     <RuntimeHostConfigurationOption Include="System.Globalization.AppLocalIcu" Value="72.1.0.3" Condition="$(RuntimeIdentifier.StartsWith('linux')) or $(RuntimeIdentifier.StartsWith('win')) or ('$(RuntimeIdentifier)' == '' and !$([MSBuild]::IsOSPlatform('osx')))" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\..\Common\Member Lists\Org-A.csv" Link="Member Lists\Org-A.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="..\..\Common\Member Lists\Org-B.csv" Link="Member Lists\Org-B.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+  <Target Name="CopySharedMemberLists" BeforeTargets="Build">
+    <Copy SourceFiles="..\..\Common\Member Lists\Org-A.csv" DestinationFolder="$(MSBuildProjectDirectory)\Member Lists" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="..\..\Common\Member Lists\Org-B.csv" DestinationFolder="$(MSBuildProjectDirectory)\Member Lists" SkipUnchangedFiles="true" />
+  </Target>
 
   <ItemGroup>
     <Folder Include="Seed\" />

@@ -457,6 +457,9 @@ $RECYCLE.BIN/
 ## Umbraco CMS
 ##
 
+# Local overrides — sensitive config (SMTP, recipients). Copy appsettings.Local.example.json and fill in.
+appsettings.Local.json
+
 # JSON schema files for appsettings.json
 appsettings-schema.json
 appsettings-schema.*.json

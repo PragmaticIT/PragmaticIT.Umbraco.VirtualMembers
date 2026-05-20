@@ -4,6 +4,7 @@
 *.suo
 *.userosscache
 *.sln.docstates
+*.lscache
 
 ## Build output
 [Bb]in/

@@ -17,7 +17,7 @@
     <NuGetAudit>false</NuGetAudit>
     <!-- NuGet packaging -->
     <PackageId>PragmaticIT.Umbraco.VirtualMembers</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Hubert</Authors>
     <Company>Pragmatic IT</Company>
     <Copyright>Copyright © 2025 Pragmatic IT</Copyright>

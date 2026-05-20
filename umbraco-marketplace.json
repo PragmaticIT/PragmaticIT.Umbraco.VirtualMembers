@@ -1,0 +1,17 @@
+{
+  "$schema": "https://marketplace.umbraco.com/umbraco-marketplace-schema.json",
+  "Title": "Virtual Members",
+  "Description": "Passwordless, database-free member authentication for Umbraco CMS. Protect content nodes with email-only, OTP, or MFA login — members loaded from plain CSV files, no Umbraco Members database records required.",
+  "Category": "Developer Tools",
+  "PackageType": "Package",
+  "LicenseTypes": [ "Free" ],
+  "DocumentationUrl": "https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/blob/main/docs/USAGE.md",
+  "IssueTrackerUrl": "https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/issues",
+  "Tags": [ "members", "authentication", "passwordless", "otp", "mfa", "csv", "public access" ],
+  "AuthorDetails": {
+    "Name": "Pragmatic IT",
+    "Url": "https://github.com/PragmaticIT",
+    "SyncContributorsFromRepository": true
+  },
+  "VersionDependencyMode": "SemVer"
+}

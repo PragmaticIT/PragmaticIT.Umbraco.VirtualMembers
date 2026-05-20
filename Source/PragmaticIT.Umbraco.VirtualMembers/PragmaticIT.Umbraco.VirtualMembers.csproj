@@ -22,7 +22,7 @@
     <Company>Pragmatic IT</Company>
     <Copyright>Copyright © 2025 Pragmatic IT</Copyright>
     <Description>Virtual member and passwordless authentication for Umbraco CMS � supports CSV-based member providers, OTP, and pluggable custom providers.</Description>
-    <PackageTags>umbraco;members;authentication;virtual;csv;otp</PackageTags>
+    <PackageTags>umbraco;members;authentication;virtual;csv;otp;umbraco-marketplace</PackageTags>
     <PackageProjectUrl>https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers</PackageProjectUrl>
     <RepositoryUrl>https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

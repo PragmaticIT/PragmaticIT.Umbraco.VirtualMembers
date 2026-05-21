@@ -34,7 +34,9 @@ No code changes are required in `Program.cs` or `Startup.cs`. The package regist
 
 ## 2. Add configuration
 
-Add a `VirtualMembers` section to `appsettings.json`. All values below are the defaults — you only need to include keys you want to change.
+The `VirtualMembers` section in `appsettings.json` is **optional** — the package runs with sensible defaults even when no configuration is present. Add the section only when you need to override a specific value.
+
+All values below are the defaults — you only need to include keys you want to change.
 
 ```json
 {
@@ -90,7 +92,7 @@ umbraco/
 
 ### CSV format
 
-The file must use semicolons as the column separator and include a header row. Column order does not matter, but the column names are fixed.
+The file must use semicolons as the column separator and include a header row. The header row is required — column names are used to locate each field, so **column order does not matter**.
 
 ```
 Name;Email;Mobile
@@ -286,12 +288,12 @@ For each content node you want to protect:
 Set `Auth.Mode` in `appsettings.json`:
 
 ### `None` (default)
-Email-only. The user types their email address and — if it is found in a CSV file — they are signed in immediately. Suitable for demos and low-security internal tools.
+Email-only. The user types their email address and — if it is found in a CSV file — they are signed in immediately. Suitable for demos and low-security sites.
 
 ### `Otp`
 Email + one-time code. After the user submits their email, a 6-digit code is sent to that address. The user then enters the code on the same login page (step 2).
 
-Requires an email delivery infrastructure. The `OtpService` sends the email via the standard .NET email sender configured in your application.
+Requires Umbraco SMTP configuration — set the `Umbraco:CMS:Global:Smtp` section in `appsettings.json` as described in the [Umbraco SMTP settings documentation](https://docs.umbraco.com/umbraco-cms/develop-with-umbraco/configuration/globalsettings#smtp-settings). The `OtpService` sends the email via the standard .NET email sender wired up by Umbraco.
 
 ### `Mfa`
 Email code + SMS code. Both codes are issued simultaneously on step 1. Both must be submitted together on step 2. The user's `Mobile` column in the CSV must contain a valid phone number.
@@ -321,8 +323,25 @@ The `message` is already formatted using `Sms.OtpMessageTemplate` from options (
 
 ## 8. Example project
 
-The `Example/` directory in the repository contains a standalone Umbraco project that references the **published NuGet package** (rather than the local source). It serves as a reference implementation showing all features working end-to-end.
+The `Examples/VirtualMembersTest/` directory in the repository contains a complete, runnable Umbraco project that references the **published NuGet package** (`PragmaticIT.Umbraco.VirtualMembers`). It demonstrates all features working end-to-end:
 
-> ⚠️ The example project is still a work in progress. Once complete it will demonstrate a full two-organisation setup with OTP login, CSV hot-reload, and Public Access integration.
+- Two organisations (`Org-A`, `Org-B`) each backed by their own CSV member list.
+- Login, logout, and access-denied views wired to Umbraco content nodes.
+- Public Access rules protecting organisation-specific content nodes.
+- CSV hot-reload via the file watcher.
 
-The example project uses the `Common/Seed/` infrastructure to automatically create content nodes and Public Access rules on first run, so no manual back-office configuration is needed. This seed code is **part of the example host only** and is not shipped as part of the NuGet package.
+**Automatic setup — no back-office configuration needed.**
+On first run the seed infrastructure (`Common/Seed/`) imports all required document types, content nodes, and Public Access rules from embedded XML packages. The seed code is part of the example host only and is not shipped as part of the NuGet package.
+
+**CSV member lists** are shared from `Common/Member Lists/` and copied into the project directory at build time.
+
+To run the example:
+
+```
+cd Examples/VirtualMembersTest
+dotnet run
+```
+
+Then open the back-office at `/umbraco` to verify the content tree, or navigate directly to a protected page to test the login flow.
+
+> **Note:** Due to Umbraco's content cache warm-up, freshly seeded content nodes may return 404 on the first request even though they are correctly published. If this happens, restart the application once or twice until the content cache is fully populated.

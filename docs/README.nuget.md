@@ -11,14 +11,14 @@
 
 ## Why Virtual Members?
 
-Standard Umbraco authentication requires member records in the database, back-office setup, and password management. Virtual Members removes all of that — drop a CSV file, configure one `appsettings.json` section, and your protected pages are ready.
+Standard Umbraco authentication requires member records in the database, back-office setup, and password management. Virtual Members removes all of that — drop a CSV file, configure one `appsettings.json` section (optional - the defaults work out of the box), and your protected pages are ready.
 
 ---
 
 ## Features
 
 - 🔑 **Passwordless login** — email-only, OTP (email code), or MFA (email + SMS code)
-- 📄 **CSV member lists** — drop files into `App_Data/VirtualMembers`, no database needed
+- 📄 **CSV member lists** — drop files into `umbraco/Data/VirtualMembers`, no database needed
 - 🔄 **Hot-reload** — file-system watcher invalidates the in-memory cache automatically
 - 🛡️ **Umbraco Public Access integration** — works with standard protected pages and member groups
 - 🔌 **Pluggable providers** — implement `IVirtualMemberProvider` to source members from any backend
@@ -46,7 +46,7 @@ dotnet add package PragmaticIT.Umbraco.VirtualMembers
 
 No changes needed in `Program.cs` — the package registers itself via an Umbraco `IComposer`.
 
-### 2. Configure `appsettings.json`
+### 2. Configure `appsettings.json` (optional - the defaults work out of the box)
 
 ```json
 {

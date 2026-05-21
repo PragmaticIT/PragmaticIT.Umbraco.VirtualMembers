@@ -41,6 +41,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01 Docs", "01 Docs", "{6BAF
 		docs\IMPLEMENTATION.md = docs\IMPLEMENTATION.md
 		README.md = README.md
 		docs\README.nuget.md = docs\README.nuget.md
+		docs\skrift-article.md = docs\skrift-article.md
 		docs\USAGE.md = docs\USAGE.md
 	EndProjectSection
 EndProject

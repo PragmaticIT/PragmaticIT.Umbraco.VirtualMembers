@@ -55,12 +55,13 @@ No changes to `Program.cs`. The package registers itself via an Umbraco `ICompos
 
 ### 2. Drop a CSV file in the right folder
 
-Create `App_Data/VirtualMembers/` and add a file. **The file name becomes the group name.**
+Create `umbraco/Data/VirtualMembers/` and add a file. **The file name becomes the group name.**
 
 ```
-App_Data/
-└── VirtualMembers/
-    └── Acme-Corp.csv
+umbraco/
+└── Data/
+    └── VirtualMembers/
+        └── Acme-Corp.csv
 ```
 
 ```
@@ -85,7 +86,7 @@ Notice that neither row has a phone number. The `Mobile` column is optional — 
     "PostLoginRedirectUrl": "/"
   },
   "Csv": {
-    "Directory": "App_Data/VirtualMembers"
+    "Directory": "|DataDirectory|/VirtualMembers"
   }
 }
 ```
@@ -173,8 +174,14 @@ On the topic of audit trails: every login attempt, challenge step, and logout is
 
 But if you need to give a client's team read access to a section of your Umbraco site — and you'd rather spend the afternoon on something more interesting than provisioning accounts — drop in a CSV file, set `Mode: "None"`, and call it done.
 
-The package is open source and available on NuGet. Contributions welcome.
+The package is open source and available on NuGet. Bug reports and feature requests are welcome via [GitHub Issues](https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/issues); pull requests are equally appreciated.
 
 ---
 
-*Source code and full documentation: [github.com/pragmatic-agency/PragmaticIT.Umbraco.VirtualMembers](https://github.com/pragmatic-agency/PragmaticIT.Umbraco.VirtualMembers)*
+*Source code and full documentation: [github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers](https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers)*
+
+---
+
+## Author's BIO
+
+Hubert is a consultant, software architect, developer and entrepreneur who has been building software since the Y2K era. A long time C# / .NET enthusiast, he focuses on maintaining and evolving business critical .NET applications, with a recent emphasis on Umbraco based portals and DMS platforms. He enjoys translating between business stakeholders and development teams, and outside of work he’s a husband, father of two boys, and an occasional djembe player.

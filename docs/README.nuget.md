@@ -141,12 +141,13 @@ To add a logout button anywhere on the site:
 </form>
 ```
 
-**Access Denied view** — shown when an authenticated user lacks access to a protected node (403). Configure it as the "No access" page in Public Access settings. No special injection required — a simple message is enough.
+**Access Denied view** — shown when an authenticated user lacks access to a protected node (403). Configure it as the "No access" page in Public Access settings. Optionally inject `IOptions<VirtualMembersOptions>` and read `Context.User` to display the signed-in email and group membership.
 
 ### 5. Protect content in the back-office
 
 In the Umbraco back-office go to **Info → Public Access** on any content node and set:
 - **Login page** → your `/login` node
+- **Error/No access page** → your Access Denied node
 - **Allowed groups** → `Org-A` (matches the CSV file name)
 
 That's it — users on the CSV list can now log in, everyone else is redirected to the login page.
@@ -157,6 +158,13 @@ That's it — users on the CSV list can now log in, everyone else is redirected 
 
 - 📖 [Usage guide](https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/blob/main/docs/USAGE.md) — step-by-step setup, all configuration options, view templates, authentication modes
 - 🏗️ [Architecture & internals](https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/blob/main/docs/IMPLEMENTATION.md) — authentication pipeline, provider model, extension points
+
+---
+
+## Contributing & issues
+
+- 🐛 [Report a bug or request a feature](https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/issues)
+- 🔀 [Submit a pull request](https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/pulls)
 
 ---
 

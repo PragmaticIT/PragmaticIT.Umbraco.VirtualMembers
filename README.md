@@ -13,7 +13,7 @@ Virtual Members lets you protect Umbraco content nodes with a lightweight authen
 ## Features
 
 - 🔑 **Passwordless login** — email-only, OTP (email code), or MFA (email + SMS code)
-- 📄 **CSV member lists** — drop files into `App_Data/VirtualMembers`, no database needed
+- 📄 **CSV member lists** — drop files into `umbraco/Data/VirtualMembers`, no database needed
 - 🔄 **Hot-reload** — file-system watcher invalidates the in-memory cache automatically
 - 🛡️ **Umbraco Public Access integration** — works with standard Umbraco protected pages / member groups
 - 🔌 **Pluggable providers** — implement `IVirtualMemberProvider` to source members from any backend
@@ -26,6 +26,13 @@ Virtual Members lets you protect Umbraco content nodes with a lightweight authen
 
 ```
 /
+├── docs/
+│   ├── USAGE.md               # Step-by-step integration guide (install, configure, views, modes)
+│   ├── IMPLEMENTATION.md      # Architecture & internals — pipeline, provider model, extension points
+│   ├── SEED.md                # How the auto-seed infrastructure works
+│   ├── README.nuget.md        # NuGet.org package description (published with the package)
+│   └── skrift-article.md      # Article draft: "Virtual Members — passwordless Umbraco auth"
+│
 ├── Common/
 │   ├── Member Lists/          # Sample CSV files shared by test projects (Org-A.csv, Org-B.csv)
 │   └── Seed/                  # Umbraco migration that auto-seeds content + public access rules
@@ -95,9 +102,13 @@ When you need to change templates, document types, or content nodes and want tho
 
 ---
 
-## Architecture & internals
+## Documentation
 
-See **[docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)** for a deep-dive into the authentication pipeline, provider model, middleware, and extension points.
+| File | Contents |
+|---|---|
+| [docs/USAGE.md](docs/USAGE.md) | Step-by-step integration guide — install, configure, CSV format, view templates, auth modes |
+| [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) | Architecture & internals — authentication pipeline, provider model, middleware, extension points |
+| [docs/SEED.md](docs/SEED.md) | How the auto-seed infrastructure works and how to update seed packages |
 
 ---
 
@@ -116,6 +127,17 @@ See **[docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)** for a deep-dive into th
 >
 > Tested on Umbraco 17.3.4 (latest stable). Compilation-verified on 15.0, 16.0, 17.0–17.3.
 > Incompatible with versions below 15.0 — `IPublishedContentCache.GetByIdAsync` was introduced in Umbraco 15.
+
+---
+
+## Contributing
+
+Bug reports and pull requests are welcome on [GitHub](https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers).
+
+- 🐛 [Open an issue](https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/issues) — bug reports, feature requests, questions
+- 🔀 [Submit a pull request](https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/pulls) — fixes and improvements are appreciated
+
+Please open an issue before starting work on a larger change so we can discuss the approach first.
 
 ---
 

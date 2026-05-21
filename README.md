@@ -105,7 +105,7 @@ See **[docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)** for a deep-dive into th
 
 | Dependency | Version |
 |---|---|
-| .NET | 10.0 |
+| .NET | ≥ 9.0 |
 | Umbraco CMS | ≥ 15.0 |
 
 > **Compatibility matrix**

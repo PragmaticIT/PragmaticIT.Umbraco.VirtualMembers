@@ -31,7 +31,7 @@ Standard Umbraco authentication requires member records in the database, back-of
 
 | | Version |
 |---|---|
-| .NET | 10.0 |
+| .NET | ≥ 9.0 |
 | Umbraco CMS | ≥ 15.0 |
 
 ---

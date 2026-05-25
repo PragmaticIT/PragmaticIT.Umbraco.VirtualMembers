@@ -27,6 +27,8 @@ We needed something lighter. Something where the client just hands us a list and
 
 That's how **Virtual Members** was born.
 
+Our client shares dedicated portals with their own customers — large industrial companies, think steel mills and mining operations with thousands of employees. Each portal hosts restricted content: product brochures, price lists, documents meant only for that company's staff. The client's customers' HR teams know their own rosters best — but handing them access to a third-party IAM admin panel was never on the table. Instead, an HR officer sends over an updated CSV file once a month. It gets dropped in a folder. Access is updated. Nobody files a ticket, nobody gets an unexpected invoice.
+
 ---
 
 ## The idea in one sentence
@@ -41,7 +43,7 @@ Access control — which pages a given group can see — is configured the norma
 
 ## Let's build the simplest case
 
-The simplest case is **email-only** mode: the user types their address, the system checks whether it's on the list, and — if yes — issues a session cookie. No passwords, no codes, no drama.
+The simplest case is **email-only** mode: the user types their address, the system checks whether it's on the list, and — if yes — issues a session cookie. No passwords, no codes.
 
 Here's what you need.
 
@@ -70,7 +72,7 @@ Alice Smith;alice@acme.com;
 Bob Jones;bob@acme.com;
 ```
 
-That's it. No database migrations. No back-office clicks. The in-memory cache picks it up within minutes — or immediately if you leave the file-system watcher enabled (it is, by default).
+That's it. No database migrations. No back-office clicks. The group is created automatically on first load if it doesn't already exist. The in-memory cache picks it up within minutes — or immediately if you leave the file-system watcher enabled (it is, by default).
 
 Notice that neither row has a phone number. The `Mobile` column is optional — the CSV is valid with or without it. Phone numbers only become relevant when you switch to MFA mode.
 
@@ -148,9 +150,9 @@ Three modes are available, and you switch between them with a single config valu
 
 **`None`** — email-only. The user types their address; if it's on the list, they're in. No codes, no extra steps. A reasonable choice any time membership is implied rather than sensitive — newsletter subscribers getting access to an archive, conference attendees browsing a resource library. You already have their email; the CSV is just the list you already maintain.
 
-**`Otp`** — after submitting their email the user receives a 6-digit code. They enter it on the same login page. One extra step, meaningfully stronger.
+**`Otp`** — after submitting their email the user receives a 6-digit code. They enter it on the same login page. One extra step, meaningfully stronger. The code is delivered via Umbraco's built-in `IEmailSender`, so a working SMTP configuration in Umbraco is all you need.
 
-**`Mfa`** — both an email code and an SMS code are issued simultaneously. The user must provide both to sign in. This requires a `Mobile` number in the CSV and a real SMS provider wired up via `IVirtualMemberSmsService` (Twilio, Azure Communication Services, or whatever you prefer — the package ships with a no-op placeholder so you can start without one).
+**`Mfa`** — both an email code and an SMS code are issued simultaneously. The user must provide both to sign in. This requires a `Mobile` number in the CSV and a real SMS provider wired up via `IVirtualMemberSmsService` (Twilio, Azure Communication Services, or whatever you prefer — the package ships with a no-op placeholder that writes to Debug console, so you can start without one).
 
 The login view handles all three modes from the same template. `LoginViewHelper.GetLoginContext()` tells the view whether it is in the initial email step or the challenge step, and what kind of code fields to render. You can add OTP support to the minimal template above with about ten more lines of Razor.
 
@@ -162,7 +164,7 @@ Here's the bit that took the most thought: Umbraco's Public Access system normal
 
 The solution is a decorator on `IPublicAccessChecker`. At startup the package captures Umbraco's existing registration, wraps it, and puts the wrapper back. When a request arrives carrying a valid Virtual Members cookie, the decorator evaluates access using the group roles embedded in the cookie's claims — exactly the same group names you configured in the Public Access rule — and never touches the member database. For all other requests (a real Umbraco member, an admin, an anonymous visitor) the call is forwarded to the original checker unchanged.
 
-The result: Virtual Members and regular Umbraco members can coexist on the same site, protecting different content, without either system knowing about the other.
+The result: Virtual Members and regular Umbraco members can coexist on the same site, protecting different content, without either system knowing about the other. If you'd like to dig into the implementation details — cookie structure, claim names, the registration order trick — the [IMPLEMENTATION.md](https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/blob/main/docs/IMPLEMENTATION.md) document covers all of that.
 
 ---
 
@@ -170,9 +172,9 @@ The result: Virtual Members and regular Umbraco members can coexist on the same 
 
 Virtual Members is not trying to replace a proper identity provider. If you need SSO, fine-grained permissions, or a self-service account portal, go with the real thing.
 
-On the topic of audit trails: every login attempt, challenge step, and logout is written to the application log — email address, IP address, user-agent, groups, and outcome. That's usually enough to answer "did Alice access this page on Tuesday?". What you *don't* get is oversight of the CSV update process itself. When the client emails you a new file and you drop it in the folder, there's no record of who changed what or when. If that matters for your use case, wrap the upload step in whatever change-management process you already use for config files.
+There are also no passwords — by design, not by oversight. There is nothing to hash, nothing to store, nothing to breach, and no expiry policy to enforce. A user who logs in once a quarter will never arrive to find their password has expired and needs resetting. The authentication factor is always the current state of the CSV, which the client already maintains.
 
-But if you need to give a client's team read access to a section of your Umbraco site — and you'd rather spend the afternoon on something more interesting than provisioning accounts — drop in a CSV file, set `Mode: "None"`, and call it done.
+On the topic of audit trails: every login attempt, challenge step, and logout is written to the application log — email address, IP address, user-agent, groups, and outcome. That's usually enough to answer "did Alice access this page on Tuesday?". What you *don't* get is oversight of the CSV update process itself. When the client emails you a new file and you drop it in the folder, there's no record of who changed what or when. If that matters for your use case, keeping the CSV files in a Git repository is the simplest answer — you get a full history of every change, who made it, and when, for free.
 
 The package is open source and available on NuGet. Bug reports and feature requests are welcome via [GitHub Issues](https://github.com/PragmaticIT/PragmaticIT.Umbraco.VirtualMembers/issues); pull requests are equally appreciated.
 
@@ -184,4 +186,4 @@ The package is open source and available on NuGet. Bug reports and feature reque
 
 ## Author's BIO
 
-Hubert is a consultant, software architect, developer and entrepreneur who has been building software since the Y2K era. A long time C# / .NET enthusiast, he focuses on maintaining and evolving business critical .NET applications, with a recent emphasis on Umbraco based portals and DMS platforms. He enjoys translating between business stakeholders and development teams, and outside of work he’s a husband, father of two boys, and an occasional djembe player.
+Hubert is a consultant, software architect, developer and entrepreneur who has been building software since the Y2K era. A long-time C# / .NET enthusiast, he focuses on maintaining and evolving business critical .NET applications, with a recent emphasis on Umbraco based portals and DMS platforms. He enjoys translating between business stakeholders and development teams, and outside of work he’s a husband, father of two boys, and an occasional djembe player.

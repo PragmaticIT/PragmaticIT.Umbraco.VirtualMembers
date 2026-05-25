@@ -39,6 +39,8 @@ The member list lives in a CSV file. The client maintains it at their own pace a
 
 Access control — which pages a given group can see — is configured the normal Umbraco way through Public Access rules. Nothing exotic. The only "magic" is a thin decorator on Umbraco's `IPublicAccessChecker` that knows how to evaluate a virtual session instead of demanding a real member record.
 
+If you need to give a client's team read access to a section of your Umbraco site — and you'd rather spend the afternoon on something more interesting than provisioning accounts — drop in a CSV file, set your preferred mode, and call it done. More on modes below.
+
 ---
 
 ## Let's build the simplest case
